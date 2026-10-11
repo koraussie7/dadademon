@@ -1,4 +1,10 @@
 import { CharacterGallery } from "@/components/CharacterGallery";
+import { PromptStudio } from "@/components/PromptStudio";
+import {
+	LibraryFilters,
+	filterCards,
+	collectTags,
+} from "@/components/CharacterLibraryTools";
 import { CharacterCardUploader } from "@/components/CharacterCardUploader";
 import type { CharacterCard, ParsedCharacterCard } from "@/types/character";
 import { useState } from "react";
@@ -38,6 +44,8 @@ function saveCards(cards: CharacterCard[]): void {
 export function CharacterLibraryPage() {
 	const [cards, setCards] = useState<CharacterCard[]>(() => loadCards());
 	const [notice, setNotice] = useState<string | null>(null);
+	const [query, setQuery] = useState("");
+	const [selectedTag, setSelectedTag] = useState("");
 
 	const handleImport = (parsed: ParsedCharacterCard) => {
 		setCards((prev) => {
@@ -101,7 +109,15 @@ export function CharacterLibraryPage() {
 						</h2>
 						<span className="text-xs text-gray-500">{cards.length} card(s)</span>
 					</div>
-					<CharacterGallery cards={cards} onSelect={handleSelect} onDelete={handleDelete} />
+					<LibraryFilters
+						query={query}
+						onQuery={setQuery}
+						selectedTag={selectedTag}
+						onTag={setSelectedTag}
+						tags={collectTags(cards)}
+					/>
+										<PromptStudio />
+										<CharacterGallery cards={filterCards(cards, query, selectedTag)} onSelect={handleSelect} onDelete={handleDelete} />
 				</section>
 			</div>
 

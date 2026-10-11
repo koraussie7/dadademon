@@ -252,6 +252,28 @@ ToS 관점에서 무료 티어 재방출은 gray area (INTEGRATION 문서의 Cav
 
 ---
 
+## 검토 완료: UI 미구현 영역 전수조사 + 누락 메뉴 연결 (2026-10-10)
+
+`page-wiring.test.ts`를 추가해 "라우트는 있지만 메뉴에서 접근 불가"한 상태를 회귀 테스트로 잠갔다.
+
+**발견 및 해결**
+
+| 문제 | 원인 | 해결 |
+|---|---|---|
+| `/library`, `/studio` 페이지 존재하지만 라우트 없음 | App.tsx에 `<Route>` 미등록 | 라우트 추가 |
+| `/events`, `/impact` 등 지능(Intel) 페이지 메뉴에 없음 | 사이드바 링크 누락 | Intelligence 그룹(📡 Events / ◇ Impact / 📊 Forecasts / 🔍 Evidence) 추가 |
+| 모바일 드로어에 신규 링크 누락 | 데스크톱만 수정 | 드로어에도 동일 추가 |
+| `/library`, `/studio` 중복 링크 | 사이드바+모바일 양쪽 버그 | 중복 제거 |
+
+**주의**: `ChatPage`, `CompanionChat`, `AIPackageCard` 등은 의도적 미연결(고아).
+`INTENTIONALLY_UNLINKED` 목록으로 명시해 테스트가 이들을 정상으로 취급한다.
+새로 컴포넌트를 추가했다면 이 목록에 등록할지, 메뉴에 연결할지 먼저 판단할 것.
+
+**번들 크기**: 초기 로딩 393kB(gzip 126kB). 6MB WebLLM 청크는 이미 동적 `import()`라
+온디바이스 LLM 초기화 시에만 로드됨 — 추가 코드 스플리팅 불필요.
+
+---
+
 **최종 업데이트**: 2026-10-10, stock image 통합 + PromptLab 가치 분석 통합.
 **담당 에이전트**: Claude (Sonnet 4.5 계열)
 **연락**: 새 결정은 이 문서에 직접 commit message 형식으로 추가한다.

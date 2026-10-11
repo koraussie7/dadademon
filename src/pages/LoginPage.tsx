@@ -4,15 +4,17 @@ import { useI18n } from "@/lib/i18n";
 
 interface Props {
 	onAuthSuccess?: (data: MeResponse) => void;
+	/** Pre-select the sign-up form, used by the `/register` route. */
+	initialMode?: "signin" | "signup";
 }
 
-export function LoginPage({ onAuthSuccess }: Props) {
+export function LoginPage({ onAuthSuccess, initialMode = "signin" }: Props) {
 	const { t } = useI18n();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [mode, setMode] = useState<"signin" | "signup">("signin");
+	const [mode, setMode] = useState<"signin" | "signup">(initialMode);
 
 	const API_URL =
 		(import.meta as { env?: { VITE_PUBLIC_API_URL?: string } }).env?.VITE_PUBLIC_API_URL ??

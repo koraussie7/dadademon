@@ -57,11 +57,6 @@ const INTENTIONALLY_UNROUTED: Record<string, string> = {
  * Routed paths that are intentionally absent from the sidebar, with a reason.
  */
 const INTENTIONALLY_UNLINKED: Record<string, string> = {
-	// Reachable through the Studio tab bar instead of the sidebar.
-	"/events": "surfaced via Studio tabs",
-	"/evidence": "surfaced via Studio tabs",
-	"/forecasts": "surfaced via Studio tabs",
-	"/impact": "surfaced via Studio tabs",
 	// Reached from the API Keys button in Settings, not the nav.
 	"/settings/api-keys": "reached from Settings",
 };
@@ -87,6 +82,9 @@ describe("page wiring", () => {
 	});
 });
 
+const DRAWER_MARKER = '{/* Mobile Drawer Menu */}';
+const ROUTES_MARKER = '{/* Route Screens */}';
+
 describe("navigation wiring", () => {
 	const routed = routedPaths();
 	const linked = sidebarPaths();
@@ -102,15 +100,58 @@ describe("navigation wiring", () => {
 		expect(unrouted).toEqual([]);
 	});
 
-	it("links every routable path, or records why not", () => {
-		const candidates = routed.filter(
-			(p) => p.startsWith("/") && !p.includes(":") && p !== "*",
+	describe("mobile drawer parity", () => {
+		/**
+		 * The mobile drawer in App.tsx is a hand-maintained copy of the sidebar.
+		 * It drifted twice: `/world` and `/settings` existed in the sidebar but had
+		 * no drawer entry, so phone users could not reach the P2P cockpit or their
+		 * own account settings at all.
+		 */
+		// Scope to the drawer itself: splitting on the Route Screens comment would
+		// also capture the header, whose logo link intentionally has no handler.
+		const drawerStart = app.indexOf(DRAWER_MARKER);
+		const drawerEnd = app.indexOf(ROUTES_MARKER);
+		const drawerSource = app.slice(drawerStart, drawerEnd);
+		const drawerPaths = [...drawerSource.matchAll(/to="([^"]+)"/g)].map(
+			(m) => m[1],
 		);
-		// `/` resolves to the index route; treat it as linked when present.
-		if (hasIndexRoute()) candidates.push("/");
-		const missing = candidates.filter(
-			(p) => !linked.includes(p) && !INTENTIONALLY_UNLINKED[p],
-		);
-		expect(missing).toEqual([]);
+
+		it("offers every sidebar destination", () => {
+			// `/login` is a conditional sign-in CTA: the sidebar renders it only for
+			// signed-out visitors, who are not browsing the drawer nav.
+			const conditional = ["/login"];
+			const expected = [...new Set(sidebarPaths())].filter(
+				(p) => !conditional.includes(p),
+			);
+			const missing = expected.filter((p) => !drawerPaths.includes(p));
+			expect(missing).toEqual([]);
+		});
+
+		it("closes the drawer when a link is clicked", () => {
+			// Without the onClick the drawer stays open and covers the screen the
+			// user just navigated to.
+			const navLinks = drawerSource.match(/<NavLink[\s\S]*?<\/NavLink>/g) ?? [];
+			expect(navLinks.length).toBeGreaterThan(0);
+			const withoutHandler = navLinks.filter(
+				(l) => !/onClick=\{[^}]*setMobileNavOpen/.test(l),
+			);
+			expect(withoutHandler).toEqual([]);
+		});
+
+		it("has no drawer links pointing at unrouted paths", () => {
+			const known = hasIndexRoute() ? [...routedPaths(), "/"] : routedPaths();
+			const dead = [...new Set(drawerPaths)].filter(
+				(p) => !known.includes(p) && !INTENTIONALLY_UNLINKED[p],
+			);
+			expect(dead).toEqual([]);
+		});
+
+		it("treats /settings/api-keys as a sub-route of Settings", () => {
+			// Documented in INTENTIONALLY_UNLINKED rather than silently dropped, so
+			// an unreachable sub-route cannot appear without a recorded reason.
+			expect(INTENTIONALLY_UNLINKED).toHaveProperty("/settings/api-keys");
+			expect(routedPaths()).toContain("/settings/api-keys");
+			expect(sidebarPaths()).not.toContain("/settings/api-keys");
+		});
 	});
 });

@@ -71,13 +71,30 @@ export function GuestTrialChat({ card }: { card: CharacterCard }) {
 					<p className="text-xs text-amber-200 font-semibold mb-1">
 						Trial ended — you used all 3 messages
 					</p>
-					<p className="text-[10px] text-amber-100/80">
-						Create an account to keep chatting with {card.data.name}, unlock images, and save your
-						conversation memory.
-					</p>
+					<ul className="text-[10px] text-amber-100/80 list-disc pl-4 mb-2 space-y-0.5">
+						<li>Keep chatting with {card.data.name} — full history preserved</li>
+						<li>Generate companion images (local ComfyUI or stock library)</li>
+						<li>Memory: {card.data.name} remembers you across sessions</li>
+						<li>Share &amp; discover companions over the P2P network</li>
+					</ul>
+					<button
+						type="button"
+						onClick={() => {
+							window.location.assign("/register");
+						}}
+						className="rounded-xl bg-pink-600 px-3 py-1.5 text-xs font-semibold text-white"
+					>
+						Create free account
+					</button>
 				</div>
 			) : (
-				<div className="flex gap-2">
+				<>
+					{remaining !== null && remaining === 1 && (
+						<p className="mb-2 text-[10px] text-amber-300">
+							Last free message — create an account to keep the conversation going.
+						</p>
+					)}
+					<div className="flex gap-2">
 					<input
 						type="text"
 						value={draft}
@@ -115,7 +132,8 @@ export function GuestTrialChat({ card }: { card: CharacterCard }) {
 							Send
 						</button>
 					)}
-				</div>
+					</div>
+				</>
 			)}
 		</div>
 	);
