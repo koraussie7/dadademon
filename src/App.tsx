@@ -1,16 +1,16 @@
 import { AuthGate } from "@/components/AuthGate";
-import { RequireAuth } from "@/components/RequireAuth";
 import { CandyDiscover } from "@/components/CandyDiscover";
 import { CandySidebar } from "@/components/CandySidebar";
 import { CreateCompanionModal } from "@/components/CreateCompanionModal";
-import { CANDY_PRESETS, loadAllCandyPresets, type CandyCompanion } from "@/data/candyPresets";
+import { RequireAuth } from "@/components/RequireAuth";
+import { CANDY_PRESETS, type CandyCompanion, loadAllCandyPresets } from "@/data/candyPresets";
 import { useAuth } from "@/hooks/useAuth";
 import { useColibriGatewayAdvert, useTrystero } from "@/hooks/useTrysteroP2P";
 import { useI18n } from "@/lib/i18n";
 import { IntegrationProvider } from "@/lib/integration/PrivseAIAdapter";
 import { LoginPage } from "@/pages/LoginPage";
 
-import { lazy, Suspense, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { NavLink, Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 // Route-level code splitting. Without this, every page is bundled into the main
@@ -352,6 +352,24 @@ export function App() {
 								>
 									🌐 P2P Mesh
 								</NavLink>
+								{!user && (
+									<>
+										<NavLink
+											to="/login"
+											onClick={() => setMobileNavOpen(false)}
+											className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+										>
+											🔐 Log in
+										</NavLink>
+										<NavLink
+											to="/register"
+											onClick={() => setMobileNavOpen(false)}
+											className="block px-3 py-2 rounded-xl text-sm font-semibold text-pink-300 hover:bg-white/5"
+										>
+											🞥 Sign up free
+										</NavLink>
+									</>
+								)}
 							</div>
 						)}
 
@@ -366,7 +384,10 @@ export function App() {
 									<Route
 										path="/register"
 										element={
-											<LoginPage initialMode="signup" onAuthSuccess={() => window.location.reload()} />
+											<LoginPage
+												initialMode="signup"
+												onAuthSuccess={() => window.location.reload()}
+											/>
 										}
 									/>
 									<Route

@@ -1,6 +1,6 @@
+import { useI18n } from "@/lib/i18n";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { useI18n } from "@/lib/i18n";
 
 interface User {
 	id: string;
@@ -19,7 +19,11 @@ interface Props {
 export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout }: Props) {
 	const [collapsed, setCollapsed] = useState(false);
 	const { t, locale, setLocale } = useI18n();
-	const localeOptions: ReadonlyArray<{ code: "en" | "ko" | "ja" | "zh" | "my" | "vi"; label: string; flag: string }> = [
+	const localeOptions: ReadonlyArray<{
+		code: "en" | "ko" | "ja" | "zh" | "my" | "vi";
+		label: string;
+		flag: string;
+	}> = [
 		{ code: "en", label: "English", flag: "🇺🇸" },
 		{ code: "ko", label: "한국어", flag: "🇰🇷" },
 		{ code: "ja", label: "日本語", flag: "🇯🇵" },
@@ -27,7 +31,6 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 		{ code: "my", label: "မြန်မာ", flag: "🇲" },
 		{ code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
 	];
-
 
 	return (
 		<aside
@@ -115,8 +118,21 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 				</button>
 
 				<CandyNavItem to="/hub" icon="🧠" label="AI Hub" shortLabel="Hub" collapsed={collapsed} />
-				<CandyNavItem to="/marketplace" icon="🛍️" label={t("marketplace.menu")} shortLabel={t("marketplace.shortMenu")} collapsed={collapsed} badge={t("marketplace.newBadge")} />
-				<CandyNavItem to="/integrations" icon="🔌" label="Integrations" shortLabel="Bridge" collapsed={collapsed} />
+				<CandyNavItem
+					to="/marketplace"
+					icon="🛍️"
+					label={t("marketplace.menu")}
+					shortLabel={t("marketplace.shortMenu")}
+					collapsed={collapsed}
+					badge={t("marketplace.newBadge")}
+				/>
+				<CandyNavItem
+					to="/integrations"
+					icon="🔌"
+					label="Integrations"
+					shortLabel="Bridge"
+					collapsed={collapsed}
+				/>
 				{/* The four Pythia ledgers are individually routable and
 				    deep-linkable, so they get their own nav entries rather than
 				    living only behind the Studio tab bar. Grouped under a section
@@ -131,11 +147,41 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 					</div>
 				</div>
 
-				<CandyNavItem to="/studio" icon="🔬" label="Studio" shortLabel="Studio" collapsed={collapsed} />
-				<CandyNavItem to="/events" icon="📡" label="Live Events" shortLabel="Events" collapsed={collapsed} />
-				<CandyNavItem to="/forecasts" icon="🔮" label="Forecasts" shortLabel="Forecast" collapsed={collapsed} />
-				<CandyNavItem to="/evidence" icon="🗃" label="Evidence" shortLabel="Evidence" collapsed={collapsed} />
-				<CandyNavItem to="/impact" icon="💥" label="Impact" shortLabel="Impact" collapsed={collapsed} />
+				<CandyNavItem
+					to="/studio"
+					icon="🔬"
+					label="Studio"
+					shortLabel="Studio"
+					collapsed={collapsed}
+				/>
+				<CandyNavItem
+					to="/events"
+					icon="📡"
+					label="Live Events"
+					shortLabel="Events"
+					collapsed={collapsed}
+				/>
+				<CandyNavItem
+					to="/forecasts"
+					icon="🔮"
+					label="Forecasts"
+					shortLabel="Forecast"
+					collapsed={collapsed}
+				/>
+				<CandyNavItem
+					to="/evidence"
+					icon="🗃"
+					label="Evidence"
+					shortLabel="Evidence"
+					collapsed={collapsed}
+				/>
+				<CandyNavItem
+					to="/impact"
+					icon="💥"
+					label="Impact"
+					shortLabel="Impact"
+					collapsed={collapsed}
+				/>
 				<a
 					href="https://browserytools.com"
 					target="_blank"
@@ -246,6 +292,14 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 						<span className="text-lg">👤</span>
 						{!collapsed && <span>{t("common.signIn")}</span>}
 					</NavLink>
+					{!collapsed && (
+						<NavLink
+							to="/register"
+							className="block px-3 pb-1 text-xs font-medium text-pink-300/70 hover:text-pink-200 transition-colors"
+						>
+							{t("common.signUp")}
+						</NavLink>
+					)}
 				</div>
 			)}
 		</aside>
@@ -278,7 +332,7 @@ function CandyNavItem({
 						: "text-gray-400 hover:text-gray-200 hover:bg-white/[0.04]"
 				} ${collapsed ? "justify-center" : ""}`
 			}
-			title={collapsed ? shortLabel ?? label : undefined}
+			title={collapsed ? (shortLabel ?? label) : undefined}
 		>
 			<span className="text-lg shrink-0">{icon}</span>
 			{!collapsed && <span className="truncate flex-1">{label}</span>}
