@@ -9,8 +9,8 @@
  * are served by peers, not centralized servers.
  */
 
-import { type ColibriGatewayInfo, type TrysteroP2PClient } from "@/lib/trystero-client";
 import type { ColibriModelInfo } from "@/lib/colibri-wasm-client";
+import type { ColibriGatewayInfo, TrysteroP2PClient } from "@/lib/trystero-client";
 
 export interface ModelChunk {
 	cid: string;
@@ -69,9 +69,7 @@ export class ModelDistributor {
 	}
 
 	async findModel(modelCid: string): Promise<P2PModelInfo | null> {
-		const peers = Array.from(this.peerModels.values()).filter(
-			(p) => p.modelCid === modelCid,
-		);
+		const peers = Array.from(this.peerModels.values()).filter((p) => p.modelCid === modelCid);
 
 		if (peers.length === 0) {
 			const colibriPeers = Array.from(this.colibriPeers.values());
@@ -88,9 +86,7 @@ export class ModelDistributor {
 			}
 		}
 
-		return (
-			peers.sort((a, b) => a.latency - b.latency)[0] ?? null
-		);
+		return peers.sort((a, b) => a.latency - b.latency)[0] ?? null;
 	}
 
 	async downloadModel(modelCid: string): Promise<{ manifest: ModelManifest; data: Blob } | null> {
@@ -124,15 +120,25 @@ export class ModelDistributor {
 		if (!action) return null;
 
 		const requestChunk = async (index: number): Promise<Uint8Array | null> => {
-			const response = await action.request({ modelCid, chunkIndex: index }, { target: peerId, timeoutMs: 30000 });
+			const response = await action.request(
+				{ modelCid, chunkIndex: index },
+				{ target: peerId, timeoutMs: 30000 },
+			);
 			if (response && typeof response === "object" && "data" in response) {
 				return new Uint8Array(response.data as ArrayBuffer);
 			}
 			return null;
 		};
 
-		const manifestResponse = await action.request({ modelCid, getManifest: true }, { target: peerId, timeoutMs: 15000 });
-		if (manifestResponse && typeof manifestResponse === "object" && "manifest" in manifestResponse) {
+		const manifestResponse = await action.request(
+			{ modelCid, getManifest: true },
+			{ target: peerId, timeoutMs: 15000 },
+		);
+		if (
+			manifestResponse &&
+			typeof manifestResponse === "object" &&
+			"manifest" in manifestResponse
+		) {
 			manifest = manifestResponse.manifest as ModelManifest;
 		}
 

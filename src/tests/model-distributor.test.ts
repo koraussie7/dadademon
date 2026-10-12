@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { ModelDistributor, CHUNK_SIZE } from "@/lib/model-distributor";
+import { CHUNK_SIZE, ModelDistributor } from "@/lib/model-distributor";
 import type { ModelManifest, P2PModelInfo } from "@/lib/model-distributor";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("ModelDistributor", () => {
 	let distributor: ModelDistributor;

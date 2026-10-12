@@ -16,6 +16,7 @@
 import { REGION, TRYSTERO_APP_ID, TRYSTERO_STRATEGY, resolveNostrRelays } from "@/lib/config";
 import { type ClientEvent, type Room, type SendOptions, joinRoom, selfId } from "trystero";
 
+import type { LettaGatewayInfo } from "@/types/letta";
 import type {
 	ColibriMetrics,
 	ImpactAnalysis,
@@ -24,7 +25,6 @@ import type {
 	PythiaEvent,
 	PythiaForecast,
 } from "@/types/pythia";
-import type { LettaGatewayInfo } from "@/types/letta";
 
 export interface TrysteroConfig {
 	appId: string;
