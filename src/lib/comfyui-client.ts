@@ -413,8 +413,6 @@ export class ComfyUIClient {
 	}
 }
 
-export { DEFAULT_WORKFLOW };
-
 const NSFW_WORKFLOW = {
 	"1": {
 		class_type: "CheckpointLoaderSimple",
@@ -525,4 +523,69 @@ const VIDEO_WORKFLOW = {
 	},
 } as const;
 
-export { NSFW_WORKFLOW, VIDEO_WORKFLOW };
+const QWEN_NSFW_EDIT_WORKFLOW = {
+	"1": {
+		class_type: "CheckpointLoaderSimple",
+		inputs: { ckpt_name: "qwen-image-edit-plus-nsfw-lora" },
+	},
+	"2": {
+		class_type: "LoadLoRA",
+		inputs: {
+			lora_name: "ScottzillaSystems-qwen-image-edit-plus-nsfw-lora",
+			strength_model: 1.0,
+			strength_clip: 1.0,
+		},
+	},
+	"3": {
+		class_type: "KSampler",
+		inputs: {
+			model: ["1", 0],
+			seed: 0,
+			steps: 30,
+			cfg: 7,
+			sampler_name: "dpmpp_2m",
+			scheduler: "normal",
+			denoise: 1,
+			positive: ["5", 0],
+			negative: ["6", 0],
+			vae: ["1", 2],
+		},
+	},
+	"4": {
+		class_type: "EmptyLatentImage",
+		inputs: {
+			width: 1024,
+			height: 1024,
+			batch_size: 1,
+		},
+	},
+	"5": {
+		class_type: "CLIPTextEncode",
+		inputs: {
+			clip: ["1", 1],
+			text: "photorealistic, detailed, 18+, sensual, high quality",
+		},
+	},
+	"6": {
+		class_type: "CLIPTextEncode",
+		inputs: {
+			clip: ["1", 1],
+			text: "worst quality, low quality, blurry, watermark, text, username, deformed, extra limbs, disfigured",
+		},
+	},
+	"7": {
+		class_type: "VAEDecode",
+		inputs: {
+			samples: ["3", 0],
+			vae: ["1", 2],
+		},
+	},
+	"8": {
+		class_type: "SaveImage",
+		inputs: {
+			images: ["7", 0],
+		},
+	},
+} as const;
+
+export { DEFAULT_WORKFLOW, NSFW_WORKFLOW, VIDEO_WORKFLOW, QWEN_NSFW_EDIT_WORKFLOW };

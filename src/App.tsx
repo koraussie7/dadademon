@@ -60,6 +60,9 @@ const PricingPage = lazy(() =>
 const AccountSettingsPage = lazy(() =>
 	import("@/pages/AccountSettingsPage").then((m) => ({ default: m.AccountSettingsPage })),
 );
+const ImageEditPage = lazy(() =>
+	import("@/pages/ImageEditPage").then((m) => ({ default: m.ImageEditPage })),
+);
 const APIKeysPage = lazy(() =>
 	import("@/pages/APIKeysPage").then((m) => ({ default: m.APIKeysPage })),
 );
@@ -281,6 +284,13 @@ export function App() {
 									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
 								>
 									🧠 AI Hub
+								</NavLink>
+								<NavLink
+									to="/image-edit"
+									onClick={() => setMobileNavOpen(false)}
+									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+								>
+									🎨 Qwen NSFW Editor
 								</NavLink>
 								<NavLink
 									to="/pricing"
@@ -531,6 +541,14 @@ export function App() {
 											<RequireAuth>
 												<APIKeysPage onBack={goSettings} />
 											</RequireAuth>
+										}
+									/>
+									<Route
+										path="/image-edit"
+										element={
+											<AuthGate>
+												<ImageEditPage />
+											</AuthGate>
 										}
 									/>
 									<Route path="*" element={<Navigate to="/collection" replace />} />

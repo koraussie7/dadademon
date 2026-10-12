@@ -62,12 +62,21 @@ export function estimateFitsDevice(preset: ModelPreset): { fits: boolean | null;
 	const nav = typeof navigator !== "undefined" ? navigator : undefined;
 	const mem = (nav as { deviceMemory?: number } | undefined)?.deviceMemory;
 	if (typeof mem !== "number" || mem <= 0) {
-		return { fits: null, note: "Cannot detect device memory. This model needs ~" + preset.minRamGb + "GB RAM/VRAM." };
+		return {
+			fits: null,
+			note: "Cannot detect device memory. This model needs ~" + preset.minRamGb + "GB RAM/VRAM.",
+		};
 	}
 	if (mem >= preset.minRamGb) {
-		return { fits: true, note: `Detected ~${mem}GB — should be enough (needs ~${preset.minRamGb}GB).` };
+		return {
+			fits: true,
+			note: `Detected ~${mem}GB — should be enough (needs ~${preset.minRamGb}GB).`,
+		};
 	}
-	return { fits: false, note: `Detected only ~${mem}GB. This model needs ~${preset.minRamGb}GB — expect poor performance or failure.` };
+	return {
+		fits: false,
+		note: `Detected only ~${mem}GB. This model needs ~${preset.minRamGb}GB — expect poor performance or failure.`,
+	};
 }
 
 /** Validate a preset received over P2P (size/type/sanity). Never trust peers. */
@@ -75,14 +84,20 @@ export function validatePreset(raw: unknown): ModelPreset {
 	const r = raw as Partial<ModelPreset>;
 	const runtimes: ModelPresetRuntime[] = ["ollama", "llamacpp", "lmstudio", "webllm"];
 	if (typeof r?.id !== "string" || r.id.length > 60) throw new Error("bad preset id");
-	if (typeof r?.name !== "string" || r.name.length === 0 || r.name.length > 80) throw new Error("bad preset name");
-	if (typeof r?.hfRepo !== "string" || !/^[\w.\-/]{3,120}$/.test(r.hfRepo)) throw new Error("bad hfRepo");
-	if (typeof r?.quantization !== "string" || r.quantization.length > 20) throw new Error("bad quantization");
+	if (typeof r?.name !== "string" || r.name.length === 0 || r.name.length > 80)
+		throw new Error("bad preset name");
+	if (typeof r?.hfRepo !== "string" || !/^[\w.\-/]{3,120}$/.test(r.hfRepo))
+		throw new Error("bad hfRepo");
+	if (typeof r?.quantization !== "string" || r.quantization.length > 20)
+		throw new Error("bad quantization");
 	if (!runtimes.includes(r.runtime as ModelPresetRuntime)) throw new Error("bad runtime");
-	if (typeof r?.contextLength !== "number" || r.contextLength < 512 || r.contextLength > 262144) throw new Error("bad contextLength");
-	if (typeof r?.minRamGb !== "number" || r.minRamGb < 0 || r.minRamGb > 512) throw new Error("bad minRamGb");
+	if (typeof r?.contextLength !== "number" || r.contextLength < 512 || r.contextLength > 262144)
+		throw new Error("bad contextLength");
+	if (typeof r?.minRamGb !== "number" || r.minRamGb < 0 || r.minRamGb > 512)
+		throw new Error("bad minRamGb");
 	if (typeof r?.isNSFW !== "boolean") throw new Error("bad isNSFW");
-	if (typeof r?.description !== "string" || r.description.length > 500) throw new Error("bad description");
+	if (typeof r?.description !== "string" || r.description.length > 500)
+		throw new Error("bad description");
 	if (!Array.isArray(r?.tags) || r.tags.length > 12) throw new Error("bad tags");
 	return {
 		id: r.id,
@@ -110,7 +125,8 @@ export const SEED_PRESETS: ModelPreset[] = [
 		contextLength: 32768,
 		minRamGb: 8,
 		isNSFW: true,
-		description: "Roleplay-tuned 9B model for uncensored companion chat. Runs locally on your device.",
+		description:
+			"Roleplay-tuned 9B model for uncensored companion chat. Runs locally on your device.",
 		tags: ["roleplay", "nsfw", "local"],
 		createdAt: Date.now(),
 	},
@@ -123,7 +139,8 @@ export const SEED_PRESETS: ModelPreset[] = [
 		contextLength: 32768,
 		minRamGb: 8,
 		isNSFW: true,
-		description: "Same RP model compiled for the browser (MLC/WebGPU). No install — weights stream into your browser. Desktop GPU required.",
+		description:
+			"Same RP model compiled for the browser (MLC/WebGPU). No install — weights stream into your browser. Desktop GPU required.",
 		tags: ["roleplay", "nsfw", "webgpu"],
 		createdAt: Date.now(),
 	},
@@ -138,6 +155,20 @@ export const SEED_PRESETS: ModelPreset[] = [
 		isNSFW: true,
 		description: "Slightly higher quality quantization of the same RP model via llama.cpp server.",
 		tags: ["roleplay", "nsfw", "local"],
+		createdAt: Date.now(),
+	},
+	{
+		id: "qwen-nsfw-image-edit",
+		name: "Qwen NSFW Image Edit LoRA",
+		hfRepo: "ScottzillaSystems/qwen-image-edit-plus-nsfw-lora",
+		quantization: "q4f16_1",
+		runtime: "webllm",
+		contextLength: 4096,
+		minRamGb: 6,
+		isNSFW: true,
+		description:
+			"Qwen-based image editing LoRA for NSFW content generation. Requires age verification.",
+		tags: ["nsfw", "image-edit", "lora", "webgpu"],
 		createdAt: Date.now(),
 	},
 ];

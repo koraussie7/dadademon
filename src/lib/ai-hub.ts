@@ -16,12 +16,14 @@
 
 import type { CompanionProfile } from "@/components/CompanionChat";
 import { CharacterCardParser } from "@/lib/character-card";
-import { ComfyUIClient, NSFW_WORKFLOW, VIDEO_WORKFLOW } from "@/lib/comfyui-client";
-import { ModelDistributor } from "@/lib/model-distributor";
 import {
-	stockImageToImageAsset,
-	type StockImage,
-} from "@/lib/stock-image-client";
+	ComfyUIClient,
+	NSFW_WORKFLOW,
+	QWEN_NSFW_EDIT_WORKFLOW,
+	VIDEO_WORKFLOW,
+} from "@/lib/comfyui-client";
+import { ModelDistributor } from "@/lib/model-distributor";
+import { type StockImage, stockImageToImageAsset } from "@/lib/stock-image-client";
 import type { TrysteroP2PClient } from "@/lib/trystero-client";
 import type {
 	AIHubStats,
@@ -409,9 +411,7 @@ export class AIHub {
 		// Block P2P redistribution of stock-sourced media to honor their licenses.
 		const hasStockAssets =
 			(pkg.media.images ?? []).some(
-				(img) =>
-					img.metadata?.source === "unsplash" ||
-					img.metadata?.source === "wikimedia",
+				(img) => img.metadata?.source === "unsplash" || img.metadata?.source === "wikimedia",
 			) ||
 			(pkg.media.videos ?? []).some((v) => {
 				const m = (v as unknown as { metadata?: { source?: string } }).metadata;
@@ -738,6 +738,79 @@ export class AIHub {
 	}
 
 	/**
+	 * Create a ComfyUI workflow using the Qwen NSFW Image Edit LoRA.
+	 * Requires age verification to use.
+	 *
+	 * Model: ScottzillaSystems/qwen-image-edit-plus-nsfw-lora
+	 * Uses Qwen-based image editing with NSFW LoRA applied via ComfyUI.
+	 */
+	createQwenNSFWEditWorkflow(
+		pkgId: string,
+		workflowName: string,
+		opts: {
+			prompt: string;
+			negativePrompt?: string;
+			width?: number;
+			height?: number;
+			steps?: number;
+			cfg?: number;
+			seed?: number;
+		},
+	): ComfyUIWorkflow | null {
+		if (!this.comfyui) return null;
+
+		const pkg = this.packages.get(pkgId);
+		const seed = opts.seed ?? Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+		const positiveText = opts.prompt;
+		const negativeText =
+			opts.negativePrompt ?? "worst quality, low quality, blurry, watermark, text, deformed";
+
+		const workflow = JSON.parse(JSON.stringify(QWEN_NSFW_EDIT_WORKFLOW)) as Record<
+			string,
+			Record<string, unknown>
+		>;
+
+		(workflow["4"] as { inputs: { width: number; height: number } }).inputs.width =
+			opts.width ?? 1024;
+		(workflow["4"] as { inputs: { width: number; height: number } }).inputs.height =
+			opts.height ?? 1024;
+		(workflow["3"] as { inputs: { seed: number; steps: number; cfg: number } }).inputs.seed = seed;
+		(workflow["3"] as { inputs: { seed: number; steps: number; cfg: number } }).inputs.steps =
+			opts.steps ?? 30;
+		(workflow["3"] as { inputs: { seed: number; steps: number; cfg: number } }).inputs.cfg =
+			opts.cfg ?? 7;
+		(workflow["5"] as { inputs: { text: string } }).inputs.text = positiveText;
+		(workflow["6"] as { inputs: { text: string } }).inputs.text = negativeText;
+
+		const comfyWorkflow: ComfyUIWorkflow = {
+			id: `qwen_nsfw_${this.genId()}`,
+			name: workflowName,
+			workflowJson: workflow as unknown as Record<string, unknown>,
+			lastPrompt: positiveText,
+			lastNegativePrompt: negativeText,
+			baseModel: "qwen-image-edit-plus-nsfw-lora",
+			width: opts.width ?? 1024,
+			height: opts.height ?? 1024,
+			steps: opts.steps ?? 30,
+			cfg: opts.cfg ?? 7,
+			sampler: "dpmpp_2m",
+			seed,
+		};
+
+		this.workflows.set(comfyWorkflow.id, comfyWorkflow);
+
+		if (pkg) {
+			if (!pkg.media.workflows) pkg.media.workflows = [];
+			if (!pkg.media.workflows.some((w) => w.id === comfyWorkflow.id)) {
+				pkg.media.workflows.push(comfyWorkflow);
+			}
+			this._publishLocal(pkg);
+		}
+
+		return comfyWorkflow;
+	}
+
+	/**
 	 * Create a video generation workflow for short videos (GIF/MP4).
 	 */
 	createVideoWorkflow(
@@ -908,11 +981,7 @@ export class AIHub {
 	/**
 	 * Wait for an image generation job to complete.
 	 */
-	async waitForImage(
-		jobId: string,
-		pkgId?: string,
-		timeoutMs = 60000,
-	): Promise<ImageAsset | null> {
+	async waitForImage(jobId: string, pkgId?: string, timeoutMs = 60000): Promise<ImageAsset | null> {
 		if (!this.comfyui) return null;
 		const job = await this.comfyui.waitForJob(jobId, timeoutMs);
 		if (job.status === "completed" && job.image) {
@@ -1002,22 +1071,14 @@ export class AIHub {
 		if (!workflow) return { error: "Could not create workflow" };
 		const result = await this.generateImage(pkgId, workflow);
 		if ("error" in result) return result;
-		const image = await this.waitForImage(
-			result.jobId,
-			pkgId,
-			opts.timeoutMs ?? 60000,
-		);
+		const image = await this.waitForImage(result.jobId, pkgId, opts.timeoutMs ?? 60000);
 		if (!image) return { error: "Generation timed out" };
 		// Remove the placeholder entry from this package.
 		if (pkg.media.images) {
-			pkg.media.images = pkg.media.images.filter(
-				(img) => img.url !== placeholderUrl,
-			);
+			pkg.media.images = pkg.media.images.filter((img) => img.url !== placeholderUrl);
 		}
 		if (pkg.media.gallery) {
-			pkg.media.gallery = pkg.media.gallery.filter(
-				(u) => u !== placeholderUrl,
-			);
+			pkg.media.gallery = pkg.media.gallery.filter((u) => u !== placeholderUrl);
 		}
 		this._publishLocal(pkg);
 
@@ -1074,15 +1135,11 @@ export class AIHub {
 				}
 				if (pkg.media?.images) {
 					pkg.media.images = pkg.media.images.map((img) =>
-						img.url === placeholderUrl
-						? { ...img, url, id: image.id }
-						: img,
+						img.url === placeholderUrl ? { ...img, url, id: image.id } : img,
 					);
 				}
 				if (pkg.media?.gallery) {
-					pkg.media.gallery = pkg.media.gallery.map((u) =>
-						u === placeholderUrl ? url : u,
-					);
+					pkg.media.gallery = pkg.media.gallery.map((u) => (u === placeholderUrl ? url : u));
 				}
 				this._publishLocal(pkg);
 			}
@@ -1265,9 +1322,7 @@ export class AIHub {
 	 * UI uses this to separate "Generated" / "Stock" tabs.
 	 */
 	getPackageImagesGenerated(pkgId: string): ImageAsset[] {
-		return this.getPackageImages(pkgId).filter(
-			(img) => !img.metadata?.source,
-		);
+		return this.getPackageImages(pkgId).filter((img) => !img.metadata?.source);
 	}
 
 	/**
@@ -1275,9 +1330,7 @@ export class AIHub {
 	 */
 	getPackageImagesStock(pkgId: string): ImageAsset[] {
 		return this.getPackageImages(pkgId).filter(
-			(img) =>
-				img.metadata?.source === "picsum" ||
-				img.metadata?.source === "wikimedia",
+			(img) => img.metadata?.source === "picsum" || img.metadata?.source === "wikimedia",
 		);
 	}
 
@@ -1299,7 +1352,6 @@ export class AIHub {
 		if (images.length === 0 && videos.length === 0) return null;
 		return { ...pkg, media: { ...pkg.media, images, videos } };
 	}
-
 }
 
 export { AI_PACKAGE_ACTION, DEFAULT_CONFIG, DEFAULT_MEDIA, DEFAULT_MCP_TOOLS };

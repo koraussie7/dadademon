@@ -119,6 +119,13 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 
 				<CandyNavItem to="/hub" icon="🧠" label="AI Hub" shortLabel="Hub" collapsed={collapsed} />
 				<CandyNavItem
+					to="/image-edit"
+					icon="🎨"
+					label="Qwen NSFW Editor"
+					shortLabel="Image Edit"
+					collapsed={collapsed}
+				/>
+				<CandyNavItem
 					to="/marketplace"
 					icon="🛍️"
 					label={t("marketplace.menu")}
