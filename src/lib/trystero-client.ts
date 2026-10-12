@@ -24,6 +24,7 @@ import type {
 	PythiaEvent,
 	PythiaForecast,
 } from "@/types/pythia";
+import type { LettaGatewayInfo } from "@/types/letta";
 
 export interface TrysteroConfig {
 	appId: string;
@@ -118,6 +119,7 @@ export class TrysteroP2PClient {
 		metrics: Set<PeerMessageHandler>;
 		task: Set<PeerMessageHandler>;
 		gateway: Set<PeerMessageHandler>;
+		lettaGateway: Set<PeerMessageHandler>;
 		aiPackage: Set<PeerMessageHandler>;
 	} = {
 		peerJoin: new Set(),
@@ -128,10 +130,12 @@ export class TrysteroP2PClient {
 		metrics: new Set(),
 		task: new Set(),
 		gateway: new Set(),
+		lettaGateway: new Set(),
 		aiPackage: new Set(),
 	};
 
 	private colibriPeers: Map<string, ColibriGatewayInfo> = new Map();
+	private lettaPeers: Map<string, LettaGatewayInfo> = new Map();
 
 	private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -175,6 +179,7 @@ export class TrysteroP2PClient {
 		}
 		this.peers.clear();
 		this.colibriPeers.clear();
+		this.lettaPeers.clear();
 		if (this.heartbeatTimer) {
 			clearInterval(this.heartbeatTimer);
 			this.heartbeatTimer = null;
@@ -236,6 +241,11 @@ export class TrysteroP2PClient {
 		return () => this.handlers.gateway.delete(handler);
 	}
 
+	onLettaGateway(handler: PeerMessageHandler): () => void {
+		this.handlers.lettaGateway.add(handler);
+		return () => this.handlers.lettaGateway.delete(handler);
+	}
+
 	onAIPackage(handler: PeerMessageHandler): () => void {
 		this.handlers.aiPackage.add(handler);
 		return () => this.handlers.aiPackage.delete(handler);
@@ -247,6 +257,10 @@ export class TrysteroP2PClient {
 
 	getColibriPeers(): Map<string, ColibriGatewayInfo> {
 		return new Map(this.colibriPeers);
+	}
+
+	getLettaPeers(): Map<string, LettaGatewayInfo> {
+		return new Map(this.lettaPeers);
 	}
 
 	/**
@@ -295,6 +309,15 @@ export class TrysteroP2PClient {
 	 */
 	broadcastColibriGateway(info: ColibriGatewayInfo, opts?: SendOptions): void {
 		this._sendAction("colibri-gateway", info, opts);
+	}
+
+	/**
+	 * Broadcast Letta gateway info so peers can discover P2P Letta agent endpoints.
+	 * Maps to the `letta-gateway` Trystero action.
+	 * This bridges Trystero P2P discovery with the Letta agent inference tier.
+	 */
+	broadcastLettaGateway(info: LettaGatewayInfo, opts?: SendOptions): void {
+		this._sendAction("letta-gateway", info, opts);
 	}
 
 	/**
@@ -407,11 +430,18 @@ export class TrysteroP2PClient {
 			for (const handler of this.handlers.gateway) handler(data, peerId);
 		};
 
+		const lettaGateway = this.room.makeAction("letta-gateway");
+		lettaGateway.onMessage = (data: unknown, { peerId }: { peerId: string }) => {
+			const info = data as LettaGatewayInfo;
+			this.lettaPeers.set(peerId, { ...info, peerId, timestamp: Date.now() });
+			for (const handler of this.handlers.lettaGateway) handler(data, peerId);
+		};
+
 		const aiPackage = this.room.makeAction("ai-package");
 		aiPackage.onMessage = (data: unknown, { peerId }: { peerId: string }) => {
 			for (const handler of this.handlers.aiPackage) handler(data, peerId);
 		};
-		}
+	}
 
 	private _sendAction(actionId: string, data: unknown, opts?: SendOptions): void {
 		if (!this.room) {

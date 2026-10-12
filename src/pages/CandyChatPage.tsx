@@ -24,6 +24,8 @@ import { selfId } from "trystero";
 import { getOnDeviceLLM } from "@/lib/on-device-llm-client";
 import { getWebLLM } from "@/lib/webllm-client";
 import { tryNexusChat } from "@/lib/nexus-chat";
+import { tryLettaChat } from "@/lib/letta-chat";
+import { LettaClient } from "@/lib/letta-client";
 
 const STORAGE_KEY_CUSTOM = "privseai_candy_custom_companions";
 const STORAGE_KEY_PROGRESS = "privseai_candy_relationship_progress";
@@ -32,7 +34,7 @@ type CompanionProgress = Record<string, { stage: number }>;
 export function CandyChatPage() {
   const { companionId } = useParams<{ companionId?: string }>();
   const navigate = useNavigate();
-  const { colibriPeers, broadcastColibriGateway } = useTrystero();
+  const { colibriPeers, broadcastColibriGateway, lettaPeers, broadcastLettaGateway } = useTrystero();
 
   const [progress, setProgress] = useState<CompanionProgress>(() => {
     try {
@@ -148,6 +150,60 @@ export function CandyChatPage() {
       clearInterval(interval);
     };
   }, [colibriClient, broadcastColibriGateway]);
+
+  // Broadcast this peer's Letta gateway to the P2P mesh when a Letta server
+  // is available. Only advertises non-localhost URLs so remote peers can connect.
+  useEffect(() => {
+    if (!broadcastLettaGateway) return;
+
+    const config = LettaClient.loadConfig() ?? LettaClient.getConfigFromEnv();
+    if (!config || !config.enabled) return;
+
+    const baseUrl = config.baseUrl;
+    if (!baseUrl || baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")) {
+      return;
+    }
+
+    const agentId = localStorage.getItem(`privseai_letta_agent_${baseCompanion.id}`) ?? null;
+    if (!agentId) return;
+
+    let cancelled = false;
+    const interval = setInterval(() => {
+      if (cancelled) return;
+      broadcastLettaGateway({
+        baseUrl,
+        agentId,
+        peerId: selfId,
+        region: REGION,
+        capabilities: {
+          models: ["gpt-4o-mini"],
+          memory: true,
+          tools: false,
+        },
+        timestamp: Date.now(),
+        isPublic: true,
+      });
+    }, 60_000);
+
+    broadcastLettaGateway({
+      baseUrl,
+      agentId,
+      peerId: selfId,
+      region: REGION,
+      capabilities: {
+        models: ["gpt-4o-mini"],
+        memory: true,
+        tools: false,
+      },
+      timestamp: Date.now(),
+      isPublic: true,
+    });
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [baseCompanion.id, broadcastLettaGateway]);
 
   // Persist each companion's stage so gallery rewards stay unlocked across visits.
   const handleStageProgress = (newStage: number) => {
@@ -306,6 +362,21 @@ ${memoryBlock}`
     // Tier 1c: Nexus (User's local Nexus + local LLM)
     const nexusResult = await tryNexusChat(text, systemPromptWithMemory, conversationHistory);
     if (nexusResult.reply) return nexusResult.reply;
+
+    // Tier 1d: Letta (memory-augmented local agent via self-hosted Letta OSS)
+    // Uses P2P-discovered Letta peers first, falls back to local config
+    const nearestLetta = lettaPeers.find(
+      (p) => !p.baseUrl.includes("localhost") && !p.baseUrl.includes("127.0.0.1"),
+    );
+    const lettaResult = await tryLettaChat(
+      baseCompanion.id,
+      baseCompanion.name,
+      text,
+      systemPromptWithMemory,
+      conversationHistory,
+      nearestLetta?.baseUrl,
+    );
+    if (lettaResult.reply) return lettaResult.reply;
 
     try {
       const byok = localStorage.getItem("byok_key")?.trim();

@@ -9,6 +9,7 @@ import {
   type NetworkState,
   TrysteroP2PClient,
 } from "@/lib/trystero-client";
+import type { LettaGatewayInfo } from "@/types/letta";
 import type {
   ImpactAnalysis,
   PythiaEvent,
@@ -30,6 +31,7 @@ export function useTrystero(options: UseTrysteroOptions = {}) {
   const [forecasts, setForecasts] = useState<PythiaForecast[]>([]);
   const [impacts, setImpacts] = useState<ImpactAnalysis[]>([]);
   const [colibriPeers, setColibriPeers] = useState<ColibriGatewayInfo[]>([]);
+  const [lettaPeers, setLettaPeers] = useState<LettaGatewayInfo[]>([]);
   const clientRef = useRef<TrysteroP2PClient | null>(null);
   const clientReadyRef = useRef(new Set<(client: TrysteroP2PClient) => void>());
 
@@ -75,9 +77,14 @@ export function useTrystero(options: UseTrysteroOptions = {}) {
       const peers = client.getColibriPeers();
       setColibriPeers(Array.from(peers.values()));
     });
+    const unsubLettaGateway = client.onLettaGateway(() => {
+      const peers = client.getLettaPeers();
+      setLettaPeers(Array.from(peers.values()));
+    });
     const unsubAIPackage = client.onAIPackage(() => updateNetwork());
     const unsubColibriPeerJoin = client.onPeerJoin(() => {
       setColibriPeers(Array.from(client.getColibriPeers().values()));
+      setLettaPeers(Array.from(client.getLettaPeers().values()));
     });
 
     return () => {
@@ -87,6 +94,7 @@ export function useTrystero(options: UseTrysteroOptions = {}) {
       unsubForecast();
       unsubImpact();
       unsubGateway();
+      unsubLettaGateway();
       unsubAIPackage();
       unsubColibriPeerJoin();
       client.leave();
@@ -110,6 +118,10 @@ export function useTrystero(options: UseTrysteroOptions = {}) {
     clientRef.current?.broadcastColibriGateway(info);
   }, []);
 
+  const broadcastLettaGateway = useCallback((info: LettaGatewayInfo) => {
+    clientRef.current?.broadcastLettaGateway(info);
+  }, []);
+
   const pingPeer = useCallback((peerId: string) => {
     return clientRef.current?.ping(peerId);
   }, []);
@@ -131,10 +143,12 @@ export function useTrystero(options: UseTrysteroOptions = {}) {
     forecasts,
     impacts,
     colibriPeers,
+    lettaPeers,
     broadcastEvent,
     broadcastForecast,
     broadcastImpact,
     broadcastColibriGateway,
+    broadcastLettaGateway,
     pingPeer,
     registerClientReady,
     isConnected: !!clientRef.current && network !== null,
