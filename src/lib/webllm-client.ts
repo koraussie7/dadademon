@@ -135,7 +135,10 @@ export class WebLLMClient {
 			const mod = await import("@mlc-ai/web-llm");
 
 			const { CreateMLCEngine } = mod as unknown as {
-				CreateMLCEngine: (modelId: string, config: { initProgressCallback: (report: { progress: number; text: string }) => void }) => Promise<MLCEngineLike>;
+				CreateMLCEngine: (
+					modelId: string,
+					config: { initProgressCallback: (report: { progress: number; text: string }) => void },
+				) => Promise<MLCEngineLike>;
 			};
 			this.engine = await CreateMLCEngine(this.modelId, {
 				initProgressCallback: (report: { progress: number; text: string }) => {
@@ -145,9 +148,7 @@ export class WebLLMClient {
 						text: report.text,
 						status: report.progress >= 1 ? "ready" : "loading",
 					});
-					console.log(
-						`[WebLLM] Loading ${this.modelId}: ${report.text} (${this.loadProgress}%)`,
-					);
+					console.log(`[WebLLM] Loading ${this.modelId}: ${report.text} (${this.loadProgress}%)`);
 				},
 			});
 

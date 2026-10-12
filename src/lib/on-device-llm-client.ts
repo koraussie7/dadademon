@@ -254,7 +254,12 @@ export class OnDeviceLLMClient {
 				repetition_penalty: 1.1,
 			};
 
-			const result = await (this.generator as unknown as (m: unknown, o: unknown) => Promise<{ generated_text: string }[]>)(messages, generationOptions);
+			const result = await (
+				this.generator as unknown as (
+					m: unknown,
+					o: unknown,
+				) => Promise<{ generated_text: string }[]>
+			)(messages, generationOptions);
 			const generatedText = result[0]?.generated_text || "";
 			const assistantResponse = this.extractAssistantResponse(generatedText, prompt);
 

@@ -51,9 +51,11 @@ export class GirlfriendAIClient {
 			...config,
 			baseUrl:
 				config.baseUrl?.replace(/\/$/, "") ??
-				(import.meta as {
-					env?: { VITE_GIRLFRIEND_AI_URL?: string };
-				}).env?.VITE_GIRLFRIEND_AI_URL ??
+				(
+					import.meta as {
+						env?: { VITE_GIRLFRIEND_AI_URL?: string };
+					}
+				).env?.VITE_GIRLFRIEND_AI_URL ??
 				DEFAULT_CONFIG.baseUrl,
 		};
 	}
@@ -128,7 +130,7 @@ export class GirlfriendAIClient {
 				return null;
 			}
 
- 			const data = (await res.json()) as {
+			const data = (await res.json()) as {
 				reply?: string;
 				response?: string;
 				content?: string;
@@ -138,8 +140,7 @@ export class GirlfriendAIClient {
 			};
 
 			const replyText =
-				data.reply ?? data.response ?? data.content ??
-				data.choices?.[0]?.message?.content ?? "";
+				data.reply ?? data.response ?? data.content ?? data.choices?.[0]?.message?.content ?? "";
 
 			return {
 				reply: replyText,
@@ -157,9 +158,7 @@ export class GirlfriendAIClient {
 		}
 	}
 
-	async listPersonas(): Promise<
-		Array<{ id: string; name: string; description?: string }>
-	> {
+	async listPersonas(): Promise<Array<{ id: string; name: string; description?: string }>> {
 		try {
 			const res = await fetch(`${this.config.baseUrl}/api/personas`, {
 				signal: AbortSignal.timeout(3000),

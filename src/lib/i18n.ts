@@ -48,7 +48,11 @@ export function interpolate(template: string, vars: Record<string, string | numb
 }
 
 /** Tiny English-only pluralization; ko/ja/zh have a single form. */
-export function plural(trees: TranslationTree | null | undefined, key: string, count: number): string | null {
+export function plural(
+	trees: TranslationTree | null | undefined,
+	key: string,
+	count: number,
+): string | null {
 	if (!trees) return null;
 	const parts = key.split(".");
 	// Walk into the tree to the parent, then look at the final segment as a
@@ -179,10 +183,7 @@ export function useI18n(): I18nApi {
 
 	const tPlural = useCallback(
 		(key: string, count: number, vars?: Record<string, string | number>) => {
-			const raw =
-				plural(trees.base, key, count) ??
-				plural(trees.fallback, key, count) ??
-				key;
+			const raw = plural(trees.base, key, count) ?? plural(trees.fallback, key, count) ?? key;
 			return vars ? interpolate(raw, { ...vars, count }) : raw;
 		},
 		[trees],

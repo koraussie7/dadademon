@@ -8,9 +8,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
  * Tests for guest trial chat logic (Phase 3).
  */
 
-import { renderHook, act, waitFor } from "@testing-library/react";
 import { useGuestChat } from "@/lib/guest-chat";
 import type { CharacterCard } from "@/types/character";
+import { act, renderHook, waitFor } from "@testing-library/react";
 
 const CARD: CharacterCard = {
 	spec: "chara_card_v2",
@@ -26,16 +26,18 @@ const CARD: CharacterCard = {
 } as unknown as CharacterCard;
 
 function jsonResponse(data: unknown, status = 200): Response {
-	return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
+	return new Response(JSON.stringify(data), {
+		status,
+		headers: { "Content-Type": "application/json" },
+	});
 }
 
 describe("useGuestChat", () => {
 	it("sends a message and tracks remaining count", async () => {
-		const fetchMock = vi.fn()
-			.mockImplementation(async () => {
-					const r = jsonResponse({ reply: "Look up! Tiramisu is rising.", remaining: 2 });
-				return r;
-			});
+		const fetchMock = vi.fn().mockImplementation(async () => {
+			const r = jsonResponse({ reply: "Look up! Tiramisu is rising.", remaining: 2 });
+			return r;
+		});
 		vi.stubGlobal("fetch", fetchMock);
 		const { result } = renderHook(() => useGuestChat(CARD));
 		expect(result.current.canChat).toBe(true);
@@ -60,7 +62,11 @@ describe("useGuestChat", () => {
 	});
 
 	it("flags limit reached on 429 and blocks further sends", async () => {
-		const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ error: "guest trial limit reached (3 messages). Sign up for more." }, 429));
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValue(
+				jsonResponse({ error: "guest trial limit reached (3 messages). Sign up for more." }, 429),
+			);
 		vi.stubGlobal("fetch", fetchMock);
 		const { result } = renderHook(() => useGuestChat(CARD));
 		await act(async () => {
@@ -72,7 +78,9 @@ describe("useGuestChat", () => {
 	});
 
 	it("surfaces provider errors without crashing", async () => {
-		const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ error: "free pool unavailable" }, 502));
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValue(jsonResponse({ error: "free pool unavailable" }, 502));
 		vi.stubGlobal("fetch", fetchMock);
 		fetchMock.mockName("guest-err-mock");
 		const { result } = renderHook(() => useGuestChat(CARD));
@@ -85,7 +93,8 @@ describe("useGuestChat", () => {
 	});
 
 	it("includes recent history (last 4) in the payload", async () => {
-		const fetchMock = vi.fn()
+		const fetchMock = vi
+			.fn()
 			.mockResolvedValueOnce(jsonResponse({ reply: "ok", remaining: 2 }))
 			.mockResolvedValueOnce(jsonResponse({ reply: "ok", remaining: 1 }))
 			.mockResolvedValueOnce(jsonResponse({ reply: "ok", remaining: 0 }));

@@ -97,7 +97,6 @@ function gatewayHeaders(): Record<string, string> {
 	};
 }
 
-
 /** Current user's quota window (used/limit/reset). Null when offline. */
 export async function fetchQuotaStatus(signal?: AbortSignal): Promise<QuotaStatus | null> {
 	try {

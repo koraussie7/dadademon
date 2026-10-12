@@ -64,7 +64,10 @@ interface RawCard {
 }
 
 function extractJson(text: string): RawCard {
-	const trimmed = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
+	const trimmed = text
+		.trim()
+		.replace(/^```(?:json)?\s*/i, "")
+		.replace(/```\s*$/, "");
 	const start = trimmed.indexOf("{");
 	const end = trimmed.lastIndexOf("}");
 	if (start === -1 || end === -1 || end <= start) {
@@ -79,7 +82,13 @@ function extractJson(text: string): RawCard {
 
 const asStr = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
 const asTags = (v: unknown): string[] =>
-	Array.isArray(v) ? v.filter((t): t is string => typeof t === "string").map((t) => t.toLowerCase().trim()).filter(Boolean).slice(0, 8) : [];
+	Array.isArray(v)
+		? v
+				.filter((t): t is string => typeof t === "string")
+				.map((t) => t.toLowerCase().trim())
+				.filter(Boolean)
+				.slice(0, 8)
+		: [];
 
 export function validateGeneratedCard(raw: RawCard, fallbackName: string): CharacterCard {
 	const name = asStr(raw.name) || fallbackName;
@@ -89,7 +98,10 @@ export function validateGeneratedCard(raw: RawCard, fallbackName: string): Chara
 	const firstMes = asStr(raw.first_mes);
 	const systemPrompt = asStr(raw.system_prompt);
 	if (!description || description.length < 20) {
-		throw new CharacterGenError("Generated description is too short or missing.", "validation-failed");
+		throw new CharacterGenError(
+			"Generated description is too short or missing.",
+			"validation-failed",
+		);
 	}
 	if (!personality || !scenario || !firstMes || !systemPrompt) {
 		throw new CharacterGenError("Generated card is missing required fields.", "validation-failed");
@@ -116,19 +128,23 @@ export function validateGeneratedCard(raw: RawCard, fallbackName: string): Chara
 }
 
 /** Generate a full character card via the server proxy. */
-export async function generateCharacterCard(
-	input: CharacterGenInput,
-): Promise<CharacterGenResult> {
+export async function generateCharacterCard(input: CharacterGenInput): Promise<CharacterGenResult> {
 	const name = input.name.trim();
 	const description = input.description.trim();
 	if (!name || name.length > 40) {
 		throw new CharacterGenError("Enter a name (1-40 characters).", "invalid-input");
 	}
 	if (!description || description.length < 10) {
-		throw new CharacterGenError("Describe the character in at least 10 characters.", "invalid-input");
+		throw new CharacterGenError(
+			"Describe the character in at least 10 characters.",
+			"invalid-input",
+		);
 	}
 	if (description.length > MAX_DESC) {
-		throw new CharacterGenError(`Description must be under ${MAX_DESC} characters.`, "invalid-input");
+		throw new CharacterGenError(
+			`Description must be under ${MAX_DESC} characters.`,
+			"invalid-input",
+		);
 	}
 	const fetchImpl = input.fetchImpl ?? fetch;
 	let response: Response;
@@ -146,14 +162,21 @@ export async function generateCharacterCard(
 		});
 	} catch (error) {
 		if (input.signal?.aborted) throw error;
-		throw new CharacterGenError("Could not reach the character generation service.", "provider-error");
+		throw new CharacterGenError(
+			"Could not reach the character generation service.",
+			"provider-error",
+		);
 	}
 	if (!response.ok) {
-		throw new CharacterGenError(`Character generation failed (HTTP ${response.status}).`, "provider-error");
+		throw new CharacterGenError(
+			`Character generation failed (HTTP ${response.status}).`,
+			"provider-error",
+		);
 	}
 	const json = (await response.json()) as { prompt?: string };
 	const text = json.prompt ?? "";
-	if (!text) throw new CharacterGenError("Generation service returned no content.", "provider-error");
+	if (!text)
+		throw new CharacterGenError("Generation service returned no content.", "provider-error");
 	const card = validateGeneratedCard(extractJson(text), name);
 	return { card };
 }

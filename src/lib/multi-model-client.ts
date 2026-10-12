@@ -103,7 +103,15 @@ const DEFAULT_ENDPOINTS: ModelEndpoint[] = [
 	{
 		name: "openrouter",
 		url: "https://openrouter.ai/api/v1/chat/completions",
-		models: ["gpt-4o-mini", "gpt-4o", "claude-3-sonnet", "llama-3.1-70b", "llama-3.1-8b", "mixtral-8x7b", "smart"],
+		models: [
+			"gpt-4o-mini",
+			"gpt-4o",
+			"claude-3-sonnet",
+			"llama-3.1-70b",
+			"llama-3.1-8b",
+			"mixtral-8x7b",
+			"smart",
+		],
 		priority: 5,
 		timeout: 30000,
 		enabled: false,
@@ -120,9 +128,10 @@ export class MultiModelChatClient {
 			return {
 				...ep,
 				...custom,
-				url: (import.meta as unknown as { env?: Record<string, string> }).env?.[
-					`VITE_${ep.name.toUpperCase().replace(/-/g, "_")}_URL`
-				] ?? ep.url,
+				url:
+					(import.meta as unknown as { env?: Record<string, string> }).env?.[
+						`VITE_${ep.name.toUpperCase().replace(/-/g, "_")}_URL`
+					] ?? ep.url,
 			};
 		}).sort((a, b) => a.priority - b.priority);
 	}
@@ -180,10 +189,7 @@ export class MultiModelChatClient {
 		throw lastError ?? new Error("All endpoints failed");
 	}
 
-	private async _tryEndpoint(
-		endpoint: ModelEndpoint,
-		req: ChatCompletionRequest,
-	): Promise<string> {
+	private async _tryEndpoint(endpoint: ModelEndpoint, req: ChatCompletionRequest): Promise<string> {
 		const headers: Record<string, string> = {
 			"Content-Type": "application/json",
 		};
@@ -252,7 +258,8 @@ export class MultiModelChatClient {
 			let reply: string | undefined;
 
 			if (endpoint.name === "anthropic") {
-				reply = (responseData as unknown as { content?: Array<{ text: string }> }).content?.[0]?.text;
+				reply = (responseData as unknown as { content?: Array<{ text: string }> }).content?.[0]
+					?.text;
 			} else {
 				reply = responseData.choices?.[0]?.message?.content;
 			}

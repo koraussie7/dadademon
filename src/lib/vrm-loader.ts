@@ -39,7 +39,8 @@ export class VRMLoader {
 	private config: Record<string, VRMConfig> = {};
 
 	async detectVRMVersion(vrmData: ArrayBuffer | string): Promise<VRMVersion> {
-		const content = typeof vrmData === "string" ? vrmData : new TextDecoder().decode(new Uint8Array(vrmData));
+		const content =
+			typeof vrmData === "string" ? vrmData : new TextDecoder().decode(new Uint8Array(vrmData));
 
 		for (const [version, pattern] of Object.entries(VRM_VERSION_PATTERNS)) {
 			if (pattern.test(content)) {
@@ -88,7 +89,10 @@ export class VRMLoader {
 		} catch (err) {
 			const result: VRMLoadResult = {
 				scene: null,
-				avatar: { name: this.extractModelName(modelPath), bounds: { width: 0, height: 0, depth: 0 } },
+				avatar: {
+					name: this.extractModelName(modelPath),
+					bounds: { width: 0, height: 0, depth: 0 },
+				},
 				expressionNames: [],
 				loaded: false,
 				error: err instanceof Error ? err.message : "Unknown error",
@@ -114,7 +118,12 @@ export class VRMLoader {
 
 	private extractModelName(path: string): string {
 		const match = path.match(/([^\/\\]+)\.(vrm|glb|glTF)/i);
-		return match ? match[1] : path.split("/").pop()?.replace(/\.(vrm|glb)$/i, "") || "avatar";
+		return match
+			? match[1]
+			: path
+					.split("/")
+					.pop()
+					?.replace(/\.(vrm|glb)$/i, "") || "avatar";
 	}
 
 	private getDefaultExpressions(version: VRMVersion): string[] {
@@ -123,9 +132,21 @@ export class VRMLoader {
 		}
 		if (version === "1.0") {
 			return [
-				"neutral", "happy", "angry", "sadness", "surprised",
-				"afraid", "disgusted", "relaxed", "blink",
-				"blinkLeft", "blinkRight", "lookUp", "lookDown", "lookLeft", "lookRight",
+				"neutral",
+				"happy",
+				"angry",
+				"sadness",
+				"surprised",
+				"afraid",
+				"disgusted",
+				"relaxed",
+				"blink",
+				"blinkLeft",
+				"blinkRight",
+				"lookUp",
+				"lookDown",
+				"lookLeft",
+				"lookRight",
 			];
 		}
 		return ["neutral"];

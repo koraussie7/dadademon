@@ -9,10 +9,10 @@
  * - Vault/memory sync
  */
 
-import { CharacterCardParser } from "@/lib/character-card";
-import type { CharacterCard, CharacterCardData, CharacterStage } from "@/types/character";
 import type { CompanionProfile } from "@/components/CompanionChat";
+import { CharacterCardParser } from "@/lib/character-card";
 import type { NetworkState } from "@/lib/trystero-client";
+import type { CharacterCard, CharacterCardData, CharacterStage } from "@/types/character";
 
 export interface YuriOSCardData {
 	name: string;
@@ -136,7 +136,14 @@ export class YuriOSBridge {
 		if (card.data.extensions?.stage && typeof card.data.extensions.stage === "string") {
 			const stage = STAGE_MAP[card.data.extensions.stage as string];
 			if (stage) {
-				profile.stage = ["stranger", "acquaintance", "friend", "close", "partner", "intimate"].indexOf(stage);
+				profile.stage = [
+					"stranger",
+					"acquaintance",
+					"friend",
+					"close",
+					"partner",
+					"intimate",
+				].indexOf(stage);
 			}
 		}
 
@@ -149,10 +156,10 @@ export class YuriOSBridge {
 			mindToolAllowlist: (env.MIND_TOOL_ALLOWLIST || "write_note,append_note,read_note,list_notes")
 				.split(",")
 				.map((s) => s.trim()),
-			mindDailyTokens: parseInt(env.MIND_DAILY_TOKENS || "5000"),
-			mindToolCallsPerDay: parseInt(env.MIND_TOOL_CALLS_PER_DAY || "8"),
-			mindToolPressureCeiling: parseFloat(env.MIND_TOOL_PRESSURE_CEILING || "0.5"),
-			researchMaxCalls: parseInt(env.RESEARCH_MAX_CALLS || "100"),
+			mindDailyTokens: Number.parseInt(env.MIND_DAILY_TOKENS || "5000"),
+			mindToolCallsPerDay: Number.parseInt(env.MIND_TOOL_CALLS_PER_DAY || "8"),
+			mindToolPressureCeiling: Number.parseFloat(env.MIND_TOOL_PRESSURE_CEILING || "0.5"),
+			researchMaxCalls: Number.parseInt(env.RESEARCH_MAX_CALLS || "100"),
 			searchBackend: env.SEARCH_BACKEND !== "off",
 			vaultPath: env.VAULT_PATH,
 			telegramBotToken: env.TELEGRAM_BOT_TOKEN,

@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	QUOTA_KEY_STORAGE,
 	QuotaExceededError,
@@ -9,6 +8,7 @@ import {
 	setQuotaKey,
 	tryQuotaChat,
 } from "@/lib/freellmpool-client";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Node test env has no localStorage — mock it in-memory (same pattern as
 // byok-store.test.ts). Never unstubAllGlobals() (it would drop this mock).
@@ -56,14 +56,15 @@ describe("quota key management", () => {
 describe("quotaChat transport", () => {
 	it("sends the quota key as Bearer to the gateway", async () => {
 		setQuotaKey("qp_user1");
-		const fetchMock = vi.fn(async () =>
-			new Response(
-				JSON.stringify({
-					choices: [{ message: { content: "hello from pool" } }],
-					usage: { prompt_tokens: 3, completion_tokens: 5, total_tokens: 8 },
-				}),
-				{ status: 200, headers: { "Content-Type": "application/json" } },
-			),
+		const fetchMock = vi.fn(
+			async () =>
+				new Response(
+					JSON.stringify({
+						choices: [{ message: { content: "hello from pool" } }],
+						usage: { prompt_tokens: 3, completion_tokens: 5, total_tokens: 8 },
+					}),
+					{ status: 200, headers: { "Content-Type": "application/json" } },
+				),
 		);
 		vi.stubGlobal("fetch", fetchMock);
 		try {
@@ -78,7 +79,6 @@ describe("quotaChat transport", () => {
 		}
 	});
 
-
 	it("throws QuotaExceededError with reset on 429", async () => {
 		setQuotaKey("qp_exhausted");
 		vi.stubGlobal(
@@ -88,8 +88,7 @@ describe("quotaChat transport", () => {
 					new Response(
 						JSON.stringify({
 							error: {
-								message:
-									"Daily quota exceeded (100/100 requests). Resets at 2026-10-11T00:00:00Z.",
+								message: "Daily quota exceeded (100/100 requests). Resets at 2026-10-11T00:00:00Z.",
 								type: "user_quota_exceeded",
 								code: 429,
 							},
@@ -125,10 +124,9 @@ describe("quotaChat transport", () => {
 			"fetch",
 			vi.fn(
 				async () =>
-					new Response(
-						JSON.stringify({ error: { message: "freellmpool upstream unreachable" } }),
-						{ status: 502 },
-					),
+					new Response(JSON.stringify({ error: { message: "freellmpool upstream unreachable" } }), {
+						status: 502,
+					}),
 			),
 		);
 		try {
@@ -172,7 +170,10 @@ describe("fetchQuotaStatus", () => {
 	});
 
 	it("returns null when offline", async () => {
-		vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new Error("offline"))));
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => Promise.reject(new Error("offline"))),
+		);
 		try {
 			await expect(fetchQuotaStatus()).resolves.toBeNull();
 		} finally {

@@ -90,15 +90,18 @@ export class TelegramRelay {
 	}
 
 	private async pollUpdates(): Promise<void> {
-		const res = await fetch(`${this.config.yuriosApiUrl}/api/telegram/updates?offset=${this.lastUpdateId + 1}`, {
-			headers: {
-				Authorization: `Bearer ${this.config.ownerToken}`,
+		const res = await fetch(
+			`${this.config.yuriosApiUrl}/api/telegram/updates?offset=${this.lastUpdateId + 1}`,
+			{
+				headers: {
+					Authorization: `Bearer ${this.config.ownerToken}`,
+				},
 			},
-		});
+		);
 
 		if (!res.ok) return;
 
-		const data = await res.json() as {
+		const data = (await res.json()) as {
 			updates: TelegramMessage[];
 			latestUpdateId: number;
 		};

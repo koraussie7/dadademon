@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { CharacterCard } from "@/types/character";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const GUEST_ENDPOINT = "https://api.privseai.com/v1/prompt/analyze";
 const GUEST_LIMIT = 3;
@@ -22,7 +22,9 @@ function buildPersonaContext(card: CharacterCard): string {
 		`You are ${d.name}. ${d.personality}`,
 		d.scenario ? `Scenario: ${d.scenario}` : "",
 		"Stay fully in character. Keep replies under 120 words.",
-	].filter(Boolean).join("\n");
+	]
+		.filter(Boolean)
+		.join("\n");
 }
 
 /**
@@ -53,10 +55,7 @@ export function useGuestChat(card: CharacterCard | null) {
 			const abort = new AbortController();
 			controllerRef.current = abort;
 			try {
-				const history: GuestMessage[] = [
-					...messages,
-					{ role: "user", content: text.trim() },
-				];
+				const history: GuestMessage[] = [...messages, { role: "user", content: text.trim() }];
 				const doFetch = async (withSignal: boolean) =>
 					fetch(GUEST_ENDPOINT, {
 						method: "POST",

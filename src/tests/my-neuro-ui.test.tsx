@@ -1,10 +1,10 @@
-// @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MyNeuroPanel } from "@/components/MyNeuroPanel";
 import { MemosSyncPanel } from "@/components/MemosSyncPanel";
+import { MyNeuroPanel } from "@/components/MyNeuroPanel";
 import { TTSButton } from "@/components/TTSButton";
 import { MyNeuroPage } from "@/pages/MyNeuroPage";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Component tests for the my-neuro integration UI.

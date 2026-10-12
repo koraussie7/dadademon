@@ -137,9 +137,7 @@ export class NexusClient {
 				return { online: false, error: `HTTP ${res.status}: ${body}` };
 			}
 
-			const data = (await res.json().catch(() => null)) as
-				| { data?: Array<{ id: string }> }
-				| null;
+			const data = (await res.json().catch(() => null)) as { data?: Array<{ id: string }> } | null;
 			const models = data?.data?.map((m) => m.id) ?? [];
 
 			let version: string | undefined;
@@ -149,9 +147,7 @@ export class NexusClient {
 					signal: AbortSignal.timeout(3000),
 				});
 				if (verRes.ok) {
-					const verData = (await verRes.json().catch(() => null)) as
-						| { version?: string }
-						| null;
+					const verData = (await verRes.json().catch(() => null)) as { version?: string } | null;
 					version = verData?.version;
 				}
 			} catch {
@@ -241,9 +237,7 @@ export class NexusClient {
 		return data;
 	}
 
-	async *chatStream(
-		request: NexusChatRequest,
-	): AsyncGenerator<NexusStreamChunk, void, unknown> {
+	async *chatStream(request: NexusChatRequest): AsyncGenerator<NexusStreamChunk, void, unknown> {
 		const res = await fetch(this.buildUrl("/v1/chat/completions"), {
 			method: "POST",
 			headers: {
@@ -366,9 +360,7 @@ export class NexusClient {
 
 	static removeDevice(deviceId: string): void {
 		try {
-			const devices = NexusClient.getStoredDevices().filter(
-				(d) => d.deviceId !== deviceId,
-			);
+			const devices = NexusClient.getStoredDevices().filter((d) => d.deviceId !== deviceId);
 			localStorage.setItem(STORAGE_KEY_DEVICES, JSON.stringify(devices));
 			if (NexusClient.getActiveDevice()?.deviceId === deviceId) {
 				NexusClient.setActiveDevice(null);
