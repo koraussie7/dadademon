@@ -76,10 +76,10 @@ export function PricingPage({ onBack }: Props) {
 					</button>
 				)}
 				<div>
-					<h1 className="text-2xl sm:text-3xl font-extrabold text-white">💎 {t("pricing.title")}</h1>
-					<p className="text-sm text-gray-400 mt-1">
-						{t("pricing.subtitle")}
-					</p>
+					<h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+						💎 {t("pricing.title")}
+					</h1>
+					<p className="text-sm text-gray-400 mt-1">{t("pricing.subtitle")}</p>
 				</div>
 			</div>
 
@@ -119,8 +119,8 @@ export function PricingPage({ onBack }: Props) {
 						</div>
 
 						<div className="space-y-3 mb-6">
-						{plan.features.map((feature) => (
-							<div key={feature} className="flex items-center gap-2 text-sm text-gray-300">
+							{plan.features.map((feature) => (
+								<div key={feature} className="flex items-center gap-2 text-sm text-gray-300">
 									<span className="text-emerald-400">✓</span>
 									{feature}
 								</div>

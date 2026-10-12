@@ -1,3 +1,10 @@
+import type { CandyCompanion } from "@/data/candyPresets";
+import {
+	companionToMyNeuro,
+	myNeuroToCompanion,
+	validateMyNeuroProfile,
+} from "@/lib/integration/MyNeuroAdapter";
+import type { MyNeuroCharacterProfile } from "@/lib/integration/my-neuro-types";
 /**
  * MyNeuroPanel — import/export my-neuro companion profiles.
  *
@@ -7,13 +14,6 @@
  * collection. No network calls — everything stays on the device.
  */
 import { useRef, useState } from "react";
-import {
-	companionToMyNeuro,
-	myNeuroToCompanion,
-	validateMyNeuroProfile,
-} from "@/lib/integration/MyNeuroAdapter";
-import type { MyNeuroCharacterProfile } from "@/lib/integration/my-neuro-types";
-import type { CandyCompanion } from "@/data/candyPresets";
 
 interface Props {
 	/** Companion to export. If omitted, export is disabled. */
@@ -108,8 +108,8 @@ export function MyNeuroPanel({ companion, onImported }: Props) {
 		<div className="bg-[#12141e] border border-white/10 rounded-3xl p-6">
 			<h2 className="text-lg font-bold text-white mb-1">my-neuro Interop</h2>
 			<p className="text-sm text-gray-400 mb-4">
-				Move a character between PrivseAI and the my-neuro desktop app as a JSON
-				profile. Files stay on your device.
+				Move a character between PrivseAI and the my-neuro desktop app as a JSON profile. Files stay
+				on your device.
 			</p>
 
 			<div className="flex flex-wrap gap-3">
@@ -144,8 +144,8 @@ export function MyNeuroPanel({ companion, onImported }: Props) {
 			<div className="mt-6 pt-5 border-t border-white/10">
 				<h3 className="text-sm font-semibold text-white mb-2">Voice (TTS)</h3>
 				<p className="text-xs text-gray-500 mb-3">
-					Speak replies through a local gpt-sovits server. Only enable if you have
-					rights to the reference voice.
+					Speak replies through a local gpt-sovits server. Only enable if you have rights to the
+					reference voice.
 				</p>
 				<label className="flex items-center gap-2 text-sm text-gray-300 mb-3">
 					<input

@@ -1,6 +1,6 @@
 import { type MeResponse, loginUrl } from "@/lib/auth";
-import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
+import { useState } from "react";
 
 interface Props {
 	onAuthSuccess?: (data: MeResponse) => void;
@@ -77,7 +77,9 @@ export function LoginPage({ onAuthSuccess, initialMode = "signin" }: Props) {
 
 					<form onSubmit={handleSubmit} className="space-y-5">
 						<div>
-							<label htmlFor="login-email" className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+							<label htmlFor="login-email" className="block text-sm font-medium text-gray-300 mb-2">
+								Email Address
+							</label>
 							<input
 								id="login-email"
 								type="email"
@@ -90,7 +92,12 @@ export function LoginPage({ onAuthSuccess, initialMode = "signin" }: Props) {
 						</div>
 
 						<div>
-							<label htmlFor="login-password" className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+							<label
+								htmlFor="login-password"
+								className="block text-sm font-medium text-gray-300 mb-2"
+							>
+								Password
+							</label>
 							<input
 								id="login-password"
 								type="password"
@@ -146,8 +153,14 @@ export function LoginPage({ onAuthSuccess, initialMode = "signin" }: Props) {
 							onClick={() => handleOAuth("github")}
 							className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-gray-200 font-medium text-sm transition"
 						>
-							<svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" role="img" aria-label="GitHub logo">
-							<title>GitHub</title>
+							<svg
+								className="w-5 h-5"
+								fill="currentColor"
+								viewBox="0 0 24 24"
+								role="img"
+								aria-label="GitHub logo"
+							>
+								<title>GitHub</title>
 								<path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.44 9.81 8.21 11.4.6.11.82-.26.82-.57 0-.29-.01-1.23-.02-2.24-3.34.73-4.04-1.61-4.04-1.61C4.42 18.07 3.63 17.7 3.63 17.7c-1.11-.75.08-.74.08-.74 1.22.09 1.86 1.25 1.86 1.25 1.09 1.87 2.87 1.34 3.57 1.03.11-.8.43-1.34.78-1.64-2.66-.31-5.47-1.33-5.47-5.94 0-1.31.47-2.39 1.24-3.24-.12-.31-.54-1.56.12-3.26 0 0 1.01-.32 3.31 1.23a11.51 11.51 0 013.01-.4c1.02.01 2.05.14 3.01.41 2.3-1.55 3.31-1.23 3.31-1.23.66 1.7.25 2.95.12 3.26.77.86 1.23 1.94 1.23 3.24 0 4.62-3.34 5.63-5.98 6.24.45.39.83 1.17.83 2.36 0 1.71-.02 3.09-.02 3.51 0 .31.21.68.82.56C20.56 22.77 24 18.21 24 12C24 5.37 18.63 0 12 0z" />
 							</svg>
 							{t("loginPage.continueGitHub")}
@@ -160,9 +173,7 @@ export function LoginPage({ onAuthSuccess, initialMode = "signin" }: Props) {
 							onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
 							className="text-sm text-pink-400 hover:text-pink-300 transition"
 						>
-							{mode === "signin"
-								? t("loginPage.newUser")
-								: t("loginPage.existingUser")}
+							{mode === "signin" ? t("loginPage.newUser") : t("loginPage.existingUser")}
 						</button>
 					</div>
 				</div>
@@ -171,7 +182,8 @@ export function LoginPage({ onAuthSuccess, initialMode = "signin" }: Props) {
 					{t("loginPage.terms")}
 					<br />
 					<label className="flex items-center justify-center gap-2 mt-2 cursor-pointer">
-						<input type="checkbox" className="rounded bg-[#0e0f17] border-white/10" />{t("loginPage.ageConfirm")}
+						<input type="checkbox" className="rounded bg-[#0e0f17] border-white/10" />
+						{t("loginPage.ageConfirm")}
 					</label>
 				</div>
 			</div>

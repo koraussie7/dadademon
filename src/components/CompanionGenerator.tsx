@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { useAIHub } from "@/hooks/useAIHub";
-import { generateCharacterCard, CharacterGenError } from "@/lib/character-generator";
+import { CharacterGenError, generateCharacterCard } from "@/lib/character-generator";
+import { useState } from "react";
 
 /**
  * One-click companion creation (OpenPerso Phase 2).
@@ -34,7 +34,9 @@ export function CompanionGenerator({ onCreated }: { onCreated?: (packageId: stri
 				baseModel: "gemini-2.5-flash-generated",
 				tags: card.data.tags,
 			});
-			setNotice(`Companion "${card.data.name}" created. Open Discover or Collection to start chatting.`);
+			setNotice(
+				`Companion "${card.data.name}" created. Open Discover or Collection to start chatting.`,
+			);
 			setName("");
 			setDescription("");
 			onCreated?.(pkg.id);
@@ -49,9 +51,14 @@ export function CompanionGenerator({ onCreated }: { onCreated?: (packageId: stri
 	};
 
 	return (
-		<section className="rounded-3xl border border-white/10 bg-[#0e1017] p-5 mb-6" aria-labelledby="companion-gen-title">
+		<section
+			className="rounded-3xl border border-white/10 bg-[#0e1017] p-5 mb-6"
+			aria-labelledby="companion-gen-title"
+		>
 			<div className="mb-4">
-				<h2 id="companion-gen-title" className="text-lg font-bold text-white">✨ One-Click Companion</h2>
+				<h2 id="companion-gen-title" className="text-lg font-bold text-white">
+					✨ One-Click Companion
+				</h2>
 				<p className="mt-1 text-xs text-gray-400">
 					Describe a character in one sentence — a full roleplay card is generated for you.
 				</p>
@@ -114,7 +121,8 @@ export function CompanionGenerator({ onCreated }: { onCreated?: (packageId: stri
 				</p>
 			)}
 			<p className="mt-3 text-[10px] text-amber-200/80">
-				Generation runs on the PrivseAI server (no API key needed). Content is model-generated — review before sharing.
+				Generation runs on the PrivseAI server (no API key needed). Content is model-generated —
+				review before sharing.
 			</p>
 		</section>
 	);

@@ -11,8 +11,7 @@ export const API_URL =
 // stays server-side and CORS is avoided, while auth (/auth/me, login, logout)
 // keeps hitting the real privseai API above. Falls back to API_URL when unset.
 export const CHAT_API_URL =
-	(import.meta as { env?: { VITE_CHAT_API_URL?: string } }).env?.VITE_CHAT_API_URL ??
-	API_URL;
+	(import.meta as { env?: { VITE_CHAT_API_URL?: string } }).env?.VITE_CHAT_API_URL ?? API_URL;
 export const TRYSTERO_STRATEGY =
 	(import.meta as { env?: { VITE_TRYSTERO_STRATEGY?: string } }).env?.VITE_TRYSTERO_STRATEGY ??
 	"nostr";
@@ -101,8 +100,8 @@ export const FREE_DAILY_QUOTA = 20;
 // VITE_QUOTA_GATEWAY_URL=http://127.0.0.1:4005 — must include the path
 // prefix the gateway serves under (no trailing slash).
 export const QUOTA_GATEWAY_URL =
-	(import.meta as { env?: { VITE_QUOTA_GATEWAY_URL?: string } }).env
-		?.VITE_QUOTA_GATEWAY_URL ?? "/freellm";
+	(import.meta as { env?: { VITE_QUOTA_GATEWAY_URL?: string } }).env?.VITE_QUOTA_GATEWAY_URL ??
+	"/freellm";
 
 export function quotaGatewayUrl(): string {
 	return QUOTA_GATEWAY_URL.replace(/\/$/, "");

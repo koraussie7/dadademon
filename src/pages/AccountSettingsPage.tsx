@@ -1,8 +1,8 @@
-import { useAuth } from "@/hooks/useAuth";
 import { ByokManager } from "@/components/ByokManager";
-import { MyNeuroPanel } from "@/components/MyNeuroPanel";
 import { MemosSyncPanel } from "@/components/MemosSyncPanel";
+import { MyNeuroPanel } from "@/components/MyNeuroPanel";
 import { P2PSyncPanel } from "@/components/P2PSyncPanel";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 
 interface Props {
@@ -135,7 +135,12 @@ export function AccountSettingsPage({ onBack }: Props) {
 
 					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<div>
-							<label htmlFor="profile-name" className="block text-sm font-medium text-gray-300 mb-2">Display Name</label>
+							<label
+								htmlFor="profile-name"
+								className="block text-sm font-medium text-gray-300 mb-2"
+							>
+								Display Name
+							</label>
 							<input
 								id="profile-name"
 								type="text"
@@ -146,7 +151,12 @@ export function AccountSettingsPage({ onBack }: Props) {
 						</div>
 
 						<div>
-							<label htmlFor="profile-email" className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+							<label
+								htmlFor="profile-email"
+								className="block text-sm font-medium text-gray-300 mb-2"
+							>
+								Email Address
+							</label>
 							<input
 								id="profile-email"
 								type="email"

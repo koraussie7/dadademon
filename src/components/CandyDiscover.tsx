@@ -1,15 +1,15 @@
+import { CompanionGenerator } from "@/components/CompanionGenerator";
+import { GuestTrialChat } from "@/components/GuestTrialChat";
+import { ModelPresetPanel } from "@/components/ModelPresetPanel";
+import { StockImageSearch } from "@/components/StockImageSearch";
 import type { CandyCompanion } from "@/data/candyPresets";
 import { useAIHub } from "@/hooks/useAIHub";
 import { useAuth } from "@/hooks/useAuth";
 import { CharacterCardParser } from "@/lib/character-card";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { StockImageSearch } from "@/components/StockImageSearch";
-import { CompanionGenerator } from "@/components/CompanionGenerator";
-import { ModelPresetPanel } from "@/components/ModelPresetPanel";
-import { GuestTrialChat } from "@/components/GuestTrialChat";
 import { hasUsedGuestTrial } from "@/lib/guest-chat";
 import type { CharacterCard } from "@/types/character";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
 	companions: CandyCompanion[];

@@ -1,14 +1,10 @@
-import { CharacterGallery } from "@/components/CharacterGallery";
-import { PromptStudio } from "@/components/PromptStudio";
-import {
-	LibraryFilters,
-	filterCards,
-	collectTags,
-} from "@/components/CharacterLibraryTools";
 import { CharacterCardUploader } from "@/components/CharacterCardUploader";
+import { CharacterGallery } from "@/components/CharacterGallery";
+import { LibraryFilters, collectTags, filterCards } from "@/components/CharacterLibraryTools";
+import type { CompanionProfile } from "@/components/CompanionChat";
+import { PromptStudio } from "@/components/PromptStudio";
 import type { CharacterCard, ParsedCharacterCard } from "@/types/character";
 import { useState } from "react";
-import type { CompanionProfile } from "@/components/CompanionChat";
 
 const STORAGE_KEY = "privseai_companion_cards";
 
@@ -80,8 +76,7 @@ export function CharacterLibraryPage() {
 			<header className="mb-6">
 				<h1 className="text-2xl font-bold text-white sm:text-3xl">Character Library</h1>
 				<p className="mt-1 text-sm text-gray-400">
-					Import TavernAI / SillyTavern character cards and manage the companions available
-					in Chat.
+					Import TavernAI / SillyTavern character cards and manage the companions available in Chat.
 				</p>
 			</header>
 
@@ -96,17 +91,13 @@ export function CharacterLibraryPage() {
 
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
 				<section className="lg:col-span-5">
-					<h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-gray-500">
-						Import
-					</h2>
+					<h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-gray-500">Import</h2>
 					<CharacterCardUploader onImport={handleImport} />
 				</section>
 
 				<section className="lg:col-span-7">
 					<div className="mb-3 flex items-baseline justify-between">
-						<h2 className="text-sm font-bold uppercase tracking-wider text-gray-500">
-							Library
-						</h2>
+						<h2 className="text-sm font-bold uppercase tracking-wider text-gray-500">Library</h2>
 						<span className="text-xs text-gray-500">{cards.length} card(s)</span>
 					</div>
 					<LibraryFilters
@@ -116,8 +107,12 @@ export function CharacterLibraryPage() {
 						onTag={setSelectedTag}
 						tags={collectTags(cards)}
 					/>
-										<PromptStudio />
-										<CharacterGallery cards={filterCards(cards, query, selectedTag)} onSelect={handleSelect} onDelete={handleDelete} />
+					<PromptStudio />
+					<CharacterGallery
+						cards={filterCards(cards, query, selectedTag)}
+						onSelect={handleSelect}
+						onDelete={handleDelete}
+					/>
 				</section>
 			</div>
 

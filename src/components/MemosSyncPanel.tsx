@@ -1,3 +1,6 @@
+import { type MemoryFact, getAllFacts } from "@/lib/companion-memory";
+import { MemoryBridgeError, type MemosConfig, syncWithMemos } from "@/lib/integration/MemoryBridge";
+import type { MemoryEntry } from "@/types/unified";
 /**
  * MemosSyncPanel — settings UI to sync companion memory with a my-neuro
  * "Memos" server (Embedding/Rerank API).
@@ -7,13 +10,6 @@
  * content), local-only records are pushed.
  */
 import { useState } from "react";
-import {
-	syncWithMemos,
-	MemoryBridgeError,
-	type MemosConfig,
-} from "@/lib/integration/MemoryBridge";
-import { getAllFacts, type MemoryFact } from "@/lib/companion-memory";
-import type { MemoryEntry } from "@/types/unified";
 
 const CONFIG_KEY = "privsei.memos.config";
 
@@ -115,8 +111,8 @@ export function MemosSyncPanel({ companionId }: Props) {
 		<div className="bg-[#12141e] border border-white/10 rounded-3xl p-6">
 			<h2 className="text-lg font-bold text-white mb-1">Memory Sync (Memos)</h2>
 			<p className="text-sm text-gray-400 mb-4">
-				Two-way sync with a my-neuro Memos server so long-term memory follows
-				you between the web app and the desktop companion.
+				Two-way sync with a my-neuro Memos server so long-term memory follows you between the web
+				app and the desktop companion.
 			</p>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

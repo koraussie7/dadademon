@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useAIHub } from "@/hooks/useAIHub";
+import { ageVerifier } from "@/lib/age-verification";
 import {
+	type ModelPreset,
 	SEED_PRESETS,
 	buildRunCommand,
 	defaultEndpoint,
 	estimateFitsDevice,
-	type ModelPreset,
 } from "@/lib/model-presets";
-import { useAIHub } from "@/hooks/useAIHub";
-import { ageVerifier } from "@/lib/age-verification";
+import { useEffect, useState } from "react";
 
 /**
  * Model preset catalog + attach-to-companion UI (Discover).
@@ -62,11 +62,17 @@ export function ModelPresetPanel() {
 	};
 
 	return (
-		<section className="rounded-3xl border border-white/10 bg-[#0e1017] p-5 mb-6" aria-labelledby="model-presets-title">
+		<section
+			className="rounded-3xl border border-white/10 bg-[#0e1017] p-5 mb-6"
+			aria-labelledby="model-presets-title"
+		>
 			<div className="mb-4">
-				<h2 id="model-presets-title" className="text-lg font-bold text-white">🧠 Local Model Presets</h2>
+				<h2 id="model-presets-title" className="text-lg font-bold text-white">
+					🧠 Local Model Presets
+				</h2>
 				<p className="mt-1 text-xs text-gray-400">
-					Run roleplay models on your own device. Presets share the <em>recipe</em> over P2P — never the model files.
+					Run roleplay models on your own device. Presets share the <em>recipe</em> over P2P — never
+					the model files.
 				</p>
 			</div>
 
@@ -84,7 +90,9 @@ export function ModelPresetPanel() {
 							<div className="flex items-start justify-between gap-2">
 								<div>
 									<h3 className="text-sm font-bold text-white">{preset.name}</h3>
-									<p className="text-[10px] text-gray-500">{preset.quantization} · {preset.runtime} · ~{preset.minRamGb}GB</p>
+									<p className="text-[10px] text-gray-500">
+										{preset.quantization} · {preset.runtime} · ~{preset.minRamGb}GB
+									</p>
 								</div>
 								{preset.isNSFW && (
 									<span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30">
@@ -93,7 +101,9 @@ export function ModelPresetPanel() {
 								)}
 							</div>
 							<p className="mt-2 text-xs text-gray-400">{preset.description}</p>
-							<p className={`mt-1 text-[10px] ${fit.fits === false ? "text-amber-300" : "text-gray-500"}`}>
+							<p
+								className={`mt-1 text-[10px] ${fit.fits === false ? "text-amber-300" : "text-gray-500"}`}
+							>
 								{fit.note}
 							</p>
 							<button
@@ -111,7 +121,9 @@ export function ModelPresetPanel() {
 											type="button"
 											onClick={() => {
 												setNotice(
-													'In-browser mode uses the chat\'s WebLLM picker. Open a companion chat and pick "' + preset.name + '" from the model list.',
+													"In-browser mode uses the chat's WebLLM picker. Open a companion chat and pick \"" +
+														preset.name +
+														'" from the model list.',
 												);
 											}}
 											className="w-full rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white"
@@ -124,7 +136,8 @@ export function ModelPresetPanel() {
 										</div>
 									)}
 									<p className="text-[10px] text-gray-500">
-										Then connect at <span className="font-mono">{defaultEndpoint(preset)}</span> via the Nexus badge in chat.
+										Then connect at <span className="font-mono">{defaultEndpoint(preset)}</span> via
+										the Nexus badge in chat.
 									</p>
 									<select
 										value={selectedPkg}
@@ -133,7 +146,9 @@ export function ModelPresetPanel() {
 									>
 										<option value="">Attach to companion…</option>
 										{aiHub.getAllPackages().map((pkg) => (
-											<option key={pkg.id} value={pkg.id}>{pkg.metadata.name}</option>
+											<option key={pkg.id} value={pkg.id}>
+												{pkg.metadata.name}
+											</option>
 										))}
 									</select>
 									<button

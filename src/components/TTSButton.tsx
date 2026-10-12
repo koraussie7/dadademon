@@ -1,3 +1,9 @@
+import {
+	DEFAULT_TTS_ENDPOINT,
+	TTSBridgeError,
+	configForCompanion,
+	synthesizeSpeech,
+} from "@/lib/integration/TTSBridge";
 /**
  * TTSButton — synthesize a chat message into speech via a local
  * gpt-sovits-compatible server (see TTSBridge) and play it inline.
@@ -6,12 +12,6 @@
  * they have rights to the voice, because voice cloning can impersonate people.
  */
 import { useEffect, useRef, useState } from "react";
-import {
-	synthesizeSpeech,
-	configForCompanion,
-	DEFAULT_TTS_ENDPOINT,
-	TTSBridgeError,
-} from "@/lib/integration/TTSBridge";
 
 interface Props {
 	text: string;
