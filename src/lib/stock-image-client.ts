@@ -61,9 +61,7 @@ interface PicsumEntry {
 	download_url: string;
 }
 
-export async function searchPicsum(
-	opts: StockSearchOptions,
-): Promise<StockImage[]> {
+export async function searchPicsum(opts: StockSearchOptions): Promise<StockImage[]> {
 	const count = Math.min(opts.count ?? 10, 30);
 	try {
 		const page = Math.floor(Math.random() * 20) + 1;
@@ -139,9 +137,7 @@ function isAllowedLicense(licenseRaw: string): boolean {
 	);
 }
 
-export async function searchWikimedia(
-	opts: StockSearchOptions,
-): Promise<StockImage[]> {
+export async function searchWikimedia(opts: StockSearchOptions): Promise<StockImage[]> {
 	const count = Math.min(opts.count ?? 12, 30);
 	// NOTE: Wikimedia API expects `iiprop` as `url|size|mime|extmetadata`.
 	// Requesting `thumburl` directly triggers a warning that strips the field.
@@ -174,8 +170,7 @@ export async function searchWikimedia(
 			if (!info.mime.startsWith("image/")) continue;
 			const licenseRaw = info.extmetadata?.["LicenseShortName"]?.value ?? "";
 			if (!isAllowedLicense(licenseRaw)) continue;
-			const author =
-				info.extmetadata?.["Artist"]?.value?.replace(/<[^>]+>/g, "").trim() ?? "";
+			const author = info.extmetadata?.["Artist"]?.value?.replace(/<[^>]+>/g, "").trim() ?? "";
 			out.push({
 				id: `commons-${page.pageid}`,
 				url: info.url,
@@ -205,13 +200,8 @@ export interface StockSearchResult {
 	errors: Partial<Record<StockSource, string>>;
 }
 
-export async function searchAllStock(
-	opts: StockSearchOptions,
-): Promise<StockSearchResult> {
-	const [picsum, wikimedia] = await Promise.allSettled([
-		searchPicsum(opts),
-		searchWikimedia(opts),
-	]);
+export async function searchAllStock(opts: StockSearchOptions): Promise<StockSearchResult> {
+	const [picsum, wikimedia] = await Promise.allSettled([searchPicsum(opts), searchWikimedia(opts)]);
 	const errors: Partial<Record<StockSource, string>> = {};
 	const results: StockImage[] = [];
 	if (picsum.status === "fulfilled") {

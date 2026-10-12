@@ -58,11 +58,15 @@ async function tx<T>(
 		const store = transaction.objectStore(STORE);
 		const req = fn(store);
 		let result: T;
-		req.onsuccess = () => { result = req.result; };
+		req.onsuccess = () => {
+			result = req.result;
+		};
 		req.onerror = () => reject(req.error);
 		transaction.oncomplete = () => resolve(result);
-		transaction.onabort = () => reject(transaction.error ?? new Error("IndexedDB transaction aborted"));
-		transaction.onerror = () => reject(transaction.error ?? new Error("IndexedDB transaction failed"));
+		transaction.onabort = () =>
+			reject(transaction.error ?? new Error("IndexedDB transaction aborted"));
+		transaction.onerror = () =>
+			reject(transaction.error ?? new Error("IndexedDB transaction failed"));
 	});
 }
 
@@ -107,13 +111,9 @@ export async function getAllCachedImages(): Promise<CachedImage[]> {
 }
 
 /** Drop a single cache entry. */
-export async function evictCachedImage(
-	pkgId: string,
-	placeholderUrl: string,
-): Promise<void> {
+export async function evictCachedImage(pkgId: string, placeholderUrl: string): Promise<void> {
 	await tx("readwrite", (store) => store.delete(key(pkgId, placeholderUrl)));
 }
-
 
 /** Stable cache namespace for files uploaded from /collection. */
 export function uploadedImageKey(id: string): string {

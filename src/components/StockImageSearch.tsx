@@ -1,8 +1,5 @@
 import { useAIHub } from "@/hooks/useAIHub";
-import {
-	searchAllStock,
-	type StockImage,
-} from "@/lib/stock-image-client";
+import { type StockImage, searchAllStock } from "@/lib/stock-image-client";
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -27,7 +24,9 @@ export function StockImageSearch() {
 	const debounceRef = useRef<number | null>(null);
 
 	// Default package: pick the first available one for attach-target.
-	const packages = Array.from((aiHub as unknown as { packages?: Map<string, unknown> }).packages?.entries() ?? []);
+	const packages = Array.from(
+		(aiHub as unknown as { packages?: Map<string, unknown> }).packages?.entries() ?? [],
+	);
 	useEffect(() => {
 		if (!selectedPkgId && packages.length > 0) {
 			setSelectedPkgId(packages[0][0]);
@@ -109,13 +108,9 @@ export function StockImageSearch() {
 				className="w-full bg-[#13141f] border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:border-pink-500/50 mb-4"
 			/>
 
-			{feedback && (
-				<div className="text-xs text-pink-300 mb-3">{feedback}</div>
-			)}
+			{feedback && <div className="text-xs text-pink-300 mb-3">{feedback}</div>}
 
-			{loading && (
-				<div className="text-xs text-gray-400 mb-3">Searching…</div>
-			)}
+			{loading && <div className="text-xs text-gray-400 mb-3">Searching…</div>}
 
 			{(errors.unsplash || errors.wikimedia) && (
 				<div className="text-[10px] text-amber-300/80 mb-3">

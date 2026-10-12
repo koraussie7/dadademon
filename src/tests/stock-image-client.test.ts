@@ -10,10 +10,10 @@
  */
 
 import {
+	type StockImage,
 	searchAllStock,
 	searchWikimedia,
 	stockImageToImageAsset,
-	type StockImage,
 } from "@/lib/stock-image-client";
 import type { ImageAsset } from "@/types/ai-package";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -23,7 +23,7 @@ const FIXTURE: StockImage = {
 	url: "https://images.unsplash.com/photo-1",
 	thumbnailUrl: "https://images.unsplash.com/photo-1?w=800",
 	title: "forest sunrise",
-	description: "Unsplash image matching \"forest sunrise\"",
+	description: 'Unsplash image matching "forest sunrise"',
 	tags: ["forest", "sunrise"],
 	width: 0,
 	height: 0,

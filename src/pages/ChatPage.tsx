@@ -1,15 +1,15 @@
-import { useMemo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { CompanionChat, type CompanionProfile } from "@/components/CompanionChat";
 import { CharacterCardUploader } from "@/components/CharacterCardUploader";
-import { PersonalityEngine } from "@/lib/personality-engine";
-import { CharacterCardParser } from "@/lib/character-card";
-import { api } from "@/lib/config";
+import { CompanionChat, type CompanionProfile } from "@/components/CompanionChat";
+import { StatusPill } from "@/components/StatusPill";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrystero } from "@/hooks/useTrysteroP2P";
-import { StatusPill } from "@/components/StatusPill";
+import { CharacterCardParser } from "@/lib/character-card";
+import { api } from "@/lib/config";
+import { PersonalityEngine } from "@/lib/personality-engine";
 import type { CharacterCard, EmotionState, ParsedCharacterCard } from "@/types/character";
 import { DEFAULT_EMOTION_STATE } from "@/types/character";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const BUILTIN: CompanionProfile[] = [
 	{
@@ -80,11 +80,7 @@ export function ChatPage() {
 		() => async (text: string) => {
 			const byok = localStorage.getItem("byok_key")?.trim();
 
-			const systemPrompt = personalityEngine.generateSystemPrompt(
-				companion,
-				currentEmotion,
-				stage,
-			);
+			const systemPrompt = personalityEngine.generateSystemPrompt(companion, currentEmotion, stage);
 
 			const nearestColibri = colibriPeers.find((p) => !p.baseUrl.includes("localhost"));
 			const colibri = nearestColibri
@@ -118,7 +114,10 @@ export function ChatPage() {
 					return "무료 채팅은 로그인 후 이용할 수 있습니다. Settings에서 Google/GitHub로 로그인하거나 BYOK 키를 넣어 주세요.";
 				}
 				if (data.error === "quota_exceeded") {
-					return data.message ?? "오늘 무료 횟수를 모두 사용했어요. BYOK를 연결하거나 내일 다시 와 주세요.";
+					return (
+						data.message ??
+						"오늘 무료 횟수를 모두 사용했어요. BYOK를 연결하거나 내일 다시 와 주세요."
+					);
 				}
 				throw new Error(data.message || data.error || `HTTP ${res.status}`);
 			}
