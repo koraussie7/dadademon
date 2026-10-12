@@ -499,6 +499,12 @@ export function App() {
 											</AuthGate>
 										}
 									/>
+<Route
+		path="/commits"
+		element={
+			<CommitsPage />
+		}
+	/>
 									{/* Single entry point + tab bar for the four ledgers above.
 						    /events, /evidence, /forecasts and /impact were routable
 						    but unlinked, so this is the only discoverable way in. */}

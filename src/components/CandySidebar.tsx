@@ -188,6 +188,15 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 					label="Impact"
 					shortLabel="Impact"
 					collapsed={collapsed}
+<CandyNavItem
+		to="/commits"
+		icon="📜"
+		label="Commits"
+		shortLabel="History"
+		collapsed={collapsed}
+	/>
+	<a
+		href="https://browserytools.com"
 				/>
 				<a
 					href="https://browserytools.com"
