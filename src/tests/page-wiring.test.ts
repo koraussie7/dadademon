@@ -82,8 +82,8 @@ describe("page wiring", () => {
 	});
 });
 
-const DRAWER_MARKER = '{/* Mobile Drawer Menu */}';
-const ROUTES_MARKER = '{/* Route Screens */}';
+const DRAWER_MARKER = "{/* Mobile Drawer Menu */}";
+const ROUTES_MARKER = "{/* Route Screens */}";
 
 describe("navigation wiring", () => {
 	const routed = routedPaths();
@@ -112,17 +112,13 @@ describe("navigation wiring", () => {
 		const drawerStart = app.indexOf(DRAWER_MARKER);
 		const drawerEnd = app.indexOf(ROUTES_MARKER);
 		const drawerSource = app.slice(drawerStart, drawerEnd);
-		const drawerPaths = [...drawerSource.matchAll(/to="([^"]+)"/g)].map(
-			(m) => m[1],
-		);
+		const drawerPaths = [...drawerSource.matchAll(/to="([^"]+)"/g)].map((m) => m[1]);
 
 		it("offers every sidebar destination", () => {
 			// `/login` is a conditional sign-in CTA: the sidebar renders it only for
 			// signed-out visitors, who are not browsing the drawer nav.
 			const conditional = ["/login"];
-			const expected = [...new Set(sidebarPaths())].filter(
-				(p) => !conditional.includes(p),
-			);
+			const expected = [...new Set(sidebarPaths())].filter((p) => !conditional.includes(p));
 			const missing = expected.filter((p) => !drawerPaths.includes(p));
 			expect(missing).toEqual([]);
 		});
@@ -132,9 +128,7 @@ describe("navigation wiring", () => {
 			// user just navigated to.
 			const navLinks = drawerSource.match(/<NavLink[\s\S]*?<\/NavLink>/g) ?? [];
 			expect(navLinks.length).toBeGreaterThan(0);
-			const withoutHandler = navLinks.filter(
-				(l) => !/onClick=\{[^}]*setMobileNavOpen/.test(l),
-			);
+			const withoutHandler = navLinks.filter((l) => !/onClick=\{[^}]*setMobileNavOpen/.test(l));
 			expect(withoutHandler).toEqual([]);
 		});
 

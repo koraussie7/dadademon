@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { YuriOSBridge } from "@/lib/yurios-bridge";
-import { VRMLoader } from "@/lib/vrm-loader";
 import { TelegramRelay, createTelegramRelay } from "@/lib/telegram-relay";
+import { VRMLoader } from "@/lib/vrm-loader";
+import { YuriOSBridge } from "@/lib/yurios-bridge";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("YuriOSBridge", () => {
 	let bridge: YuriOSBridge;
@@ -11,26 +11,30 @@ describe("YuriOSBridge", () => {
 	});
 
 	it("parses YuriOS card format", () => {
-		const card = bridge.parseYuriOSCard(JSON.stringify({
-			name: "Yuri",
-			description: "A shy AI girl.",
-			personality: { traits: ["Shy", "Bookish"] },
-			extensions: { vrm: "https://yuri.os/models/yuri.vrm", stage: "close" },
-			tags: ["romantic"],
-		}));
+		const card = bridge.parseYuriOSCard(
+			JSON.stringify({
+				name: "Yuri",
+				description: "A shy AI girl.",
+				personality: { traits: ["Shy", "Bookish"] },
+				extensions: { vrm: "https://yuri.os/models/yuri.vrm", stage: "close" },
+				tags: ["romantic"],
+			}),
+		);
 		expect(card.spec).toBe("chara_card_v2");
 		expect(card.data.name).toBe("Yuri");
 		expect(card.data.personality).toContain("Shy");
 	});
 
 	it("converts YuriOS card to CompanionProfile", () => {
-		const card = bridge.parseYuriOSCard(JSON.stringify({
-			name: "Aoi",
-			description: "Friendly AI.",
-			personality: "Playful\nSmart",
-			tags: ["gf"],
-			extensions: { vrm: "aoi.vrm", stage: "partner" },
-		}));
+		const card = bridge.parseYuriOSCard(
+			JSON.stringify({
+				name: "Aoi",
+				description: "Friendly AI.",
+				personality: "Playful\nSmart",
+				tags: ["gf"],
+				extensions: { vrm: "aoi.vrm", stage: "partner" },
+			}),
+		);
 		const profile = bridge.importYuriOSCompanion(card);
 		expect(profile.name).toBe("Aoi");
 		expect(profile.avatarUrl).toBe("aoi.vrm");

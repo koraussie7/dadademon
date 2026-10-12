@@ -1,11 +1,5 @@
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, interpolate, lookup, plural } from "@/lib/i18n";
 import { describe, expect, it } from "vitest";
-import {
-	DEFAULT_LOCALE,
-	SUPPORTED_LOCALES,
-	lookup,
-	interpolate,
-	plural,
-} from "@/lib/i18n";
 
 const en = {
 	common: { hello: "Hello" },
@@ -49,7 +43,6 @@ describe("i18n helpers", () => {
 		expect(plural(en, "common.hello", 1)).toBe("Hello");
 	});
 });
-
 
 describe("locale dictionaries", () => {
 	it("Myanmar and Vietnamese contain core UI translations", async () => {

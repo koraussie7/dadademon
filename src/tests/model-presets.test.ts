@@ -4,12 +4,12 @@ import { describe, expect, it } from "vitest";
  */
 
 import {
+	type ModelPreset,
+	SEED_PRESETS,
 	buildRunCommand,
 	defaultEndpoint,
 	estimateFitsDevice,
 	validatePreset,
-	SEED_PRESETS,
-	type ModelPreset,
 } from "@/lib/model-presets";
 
 const BASE_PRESET: ModelPreset = {

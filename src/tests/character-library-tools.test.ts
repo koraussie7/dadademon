@@ -1,11 +1,19 @@
-import { describe, expect, it } from "vitest";
-import { filterCards, collectTags } from "@/components/CharacterLibraryTools";
+import { collectTags, filterCards } from "@/components/CharacterLibraryTools";
 import type { CharacterCard } from "@/types/character";
+import { describe, expect, it } from "vitest";
 
 function card(name: string, description: string, tags: string[]): CharacterCard {
 	return {
 		spec: "chara_card_v2",
-		data: { name, description, personality: "x", scenario: "y", first_mes: "z", system_prompt: "s", tags },
+		data: {
+			name,
+			description,
+			personality: "x",
+			scenario: "y",
+			first_mes: "z",
+			system_prompt: "s",
+			tags,
+		},
 	} as unknown as CharacterCard;
 }
 
