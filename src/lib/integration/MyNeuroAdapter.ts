@@ -50,16 +50,12 @@ export function toMyNeuroId(raw: string): string {
 /**
  * PrivseAI companion (CandyCompanion-shaped) → my-neuro profile.
  */
-export function companionToMyNeuro(
-	companion: CandyCompanionLike,
-): MyNeuroCharacterProfile {
+export function companionToMyNeuro(companion: CandyCompanionLike): MyNeuroCharacterProfile {
 	const base = defaultProfile(companion.name);
 	const systemPrompt = [
 		`You are ${companion.name}, ${companion.tagline}.`,
 		companion.bio,
-		companion.personality?.length
-			? `Personality: ${companion.personality.join(", ")}.`
-			: "",
+		companion.personality?.length ? `Personality: ${companion.personality.join(", ")}.` : "",
 		companion.occupation ? `Occupation: ${companion.occupation}.` : "",
 		"Stay in character. Reply naturally and keep continuity with prior messages.",
 	]
@@ -79,7 +75,11 @@ export function companionToMyNeuro(
 			speaker: toMyNeuroId(companion.name),
 			referenceAudio: companion.voiceAudioUrl ?? "",
 		},
-		llm: { provider: base.llm?.provider ?? "local", model: base.llm?.model ?? DEFAULT_MODEL, endpoint: base.llm?.endpoint },
+		llm: {
+			provider: base.llm?.provider ?? "local",
+			model: base.llm?.model ?? DEFAULT_MODEL,
+			endpoint: base.llm?.endpoint,
+		},
 		// A shared namespace lets several devices sync the same memory later.
 		memory: { enabled: true, namespace: toMyNeuroId(companion.id) },
 		prompts: {
@@ -103,9 +103,7 @@ export function companionToMyNeuro(
  * companion or use it to build a new one. Unknown my-neuro fields are kept
  * under `myNeuroExtensions` so a later export can restore them.
  */
-export function myNeuroToCompanion(
-	profile: MyNeuroCharacterProfile,
-): MyNeuroImportResult {
+export function myNeuroToCompanion(profile: MyNeuroCharacterProfile): MyNeuroImportResult {
 	const warnings: string[] = [];
 	if (!profile.name) warnings.push("profile.name missing — import may be unusable");
 	if (!profile.prompts?.system) {
@@ -134,9 +132,7 @@ export function myNeuroToCompanion(
 				? truncate(profile.prompts.system, 280)
 				: "Imported from my-neuro.",
 			relationship: "Close Friend",
-			occupation: profile.extensions?.occupation
-				? String(profile.extensions.occupation)
-				: "",
+			occupation: profile.extensions?.occupation ? String(profile.extensions.occupation) : "",
 			hobbies: profile.hobbies ?? [],
 			personality,
 			stage: 1,
@@ -182,9 +178,7 @@ function truncate(text: string, max: number): string {
 }
 
 /** Round-trip helper: import a my-neuro profile, patch, and export again. */
-export function roundTripMyNeuro(
-	profile: MyNeuroCharacterProfile,
-): MyNeuroCharacterProfile {
+export function roundTripMyNeuro(profile: MyNeuroCharacterProfile): MyNeuroCharacterProfile {
 	const { companion } = myNeuroToCompanion(profile);
 	const exported = companionToMyNeuro(companion);
 	// Preserve original my-neuro-only fields through the round trip.

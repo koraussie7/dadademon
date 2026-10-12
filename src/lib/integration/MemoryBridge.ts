@@ -61,10 +61,7 @@ export function memoryFingerprint(
 }
 
 /** PrivseAI MemoryEntry → Memos record. */
-export function toMemosRecord(
-	entry: MemoryEntry,
-	namespace: string,
-): MemosRecord {
+export function toMemosRecord(entry: MemoryEntry, namespace: string): MemosRecord {
 	return {
 		id: entry.id,
 		content: entry.content,
@@ -162,10 +159,7 @@ export async function pullMemos(
 			},
 		);
 		if (!response.ok) {
-			throw new MemoryBridgeError(
-				"provider-error",
-				`Memos returned HTTP ${response.status}`,
-			);
+			throw new MemoryBridgeError("provider-error", `Memos returned HTTP ${response.status}`);
 		}
 		const data = (await response.json()) as { memos?: MemosRecord[] } | MemosRecord[];
 		return Array.isArray(data) ? data : (data.memos ?? []);
@@ -201,7 +195,11 @@ export async function pushMemos(
 			const response = await fetchImpl(`${base}/api/v1/memos`, {
 				method: "POST",
 				headers: authHeaders(config),
-				body: JSON.stringify({ content: record.content, tags: record.tags, creator: config.namespace }),
+				body: JSON.stringify({
+					content: record.content,
+					tags: record.tags,
+					creator: config.namespace,
+				}),
 			});
 			if (!response.ok) {
 				skipped++;
@@ -233,15 +231,17 @@ export async function syncWithMemos(
 }
 
 /** Read a my-neuro memory config into a MemosConfig for this bridge. */
-export function configForMyNeuro(profile: {
-	name: string;
-	memory?: { namespace?: string };
-}, endpoint: string, token?: string): MemosConfig {
+export function configForMyNeuro(
+	profile: {
+		name: string;
+		memory?: { namespace?: string };
+	},
+	endpoint: string,
+	token?: string,
+): MemosConfig {
 	return {
 		endpoint,
 		token,
-		namespace:
-			profile.memory?.namespace ||
-			profile.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+		namespace: profile.memory?.namespace || profile.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
 	};
 }

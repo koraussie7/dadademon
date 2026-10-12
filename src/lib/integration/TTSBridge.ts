@@ -68,10 +68,7 @@ const MAX_TEXT = 1200;
 export function normalizeTTSEndpoint(raw: string): string {
 	const trimmed = raw.trim().replace(/\/+$/, "");
 	if (!/^https?:\/\//i.test(trimmed)) {
-		throw new TTSBridgeError(
-			"not-configured",
-			"TTS endpoint must start with http:// or https://",
-		);
+		throw new TTSBridgeError("not-configured", "TTS endpoint must start with http:// or https://");
 	}
 	return trimmed;
 }
@@ -98,10 +95,7 @@ export async function synthesizeSpeech(
 	const endpoint = normalizeTTSEndpoint(config.endpoint || DEFAULT_TTS_ENDPOINT);
 
 	const controller = new AbortController();
-	const timer = setTimeout(
-		() => controller.abort(),
-		config.timeoutMs ?? DEFAULT_TIMEOUT,
-	);
+	const timer = setTimeout(() => controller.abort(), config.timeoutMs ?? DEFAULT_TIMEOUT);
 
 	try {
 		const response = await fetchImpl(`${endpoint}/api/tts`, {
@@ -118,10 +112,7 @@ export async function synthesizeSpeech(
 		});
 
 		if (!response.ok) {
-			throw new TTSBridgeError(
-				"provider-error",
-				`TTS server returned HTTP ${response.status}`,
-			);
+			throw new TTSBridgeError("provider-error", `TTS server returned HTTP ${response.status}`);
 		}
 
 		const audio = await response.blob();

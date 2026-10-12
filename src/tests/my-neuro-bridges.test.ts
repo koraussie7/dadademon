@@ -1,27 +1,27 @@
-import { describe, expect, it, vi } from "vitest";
+import {
+	MemoryBridgeError,
+	fromMemosRecord,
+	memoryFingerprint,
+	mergeMemories,
+	syncWithMemos,
+	toMemosRecord,
+} from "@/lib/integration/MemoryBridge";
 import {
 	companionToMyNeuro,
 	myNeuroToCompanion,
 	roundTripMyNeuro,
-	validateMyNeuroProfile,
 	toMyNeuroId,
+	validateMyNeuroProfile,
 } from "@/lib/integration/MyNeuroAdapter";
 import {
-	synthesizeSpeech,
-	probeTTS,
-	normalizeTTSEndpoint,
-	configForCompanion,
 	TTSBridgeError,
+	configForCompanion,
+	normalizeTTSEndpoint,
+	probeTTS,
+	synthesizeSpeech,
 } from "@/lib/integration/TTSBridge";
-import {
-	toMemosRecord,
-	fromMemosRecord,
-	mergeMemories,
-	memoryFingerprint,
-	syncWithMemos,
-	MemoryBridgeError,
-} from "@/lib/integration/MemoryBridge";
 import type { MemoryEntry } from "@/types/unified";
+import { describe, expect, it, vi } from "vitest";
 
 const companion = {
 	id: "luna-01",
@@ -76,7 +76,10 @@ describe("MyNeuroAdapter", () => {
 		expect(validateMyNeuroProfile({ name: "Ok" })).toHaveLength(0);
 		expect(validateMyNeuroProfile(null).length).toBeGreaterThan(0);
 		expect(
-			validateMyNeuroProfile({ name: "X", voice: { engine: "gpt-sovits", referenceAudio: "javascript:alert(1)" } }),
+			validateMyNeuroProfile({
+				name: "X",
+				voice: { engine: "gpt-sovits", referenceAudio: "javascript:alert(1)" },
+			}),
 		).toContain("voice.referenceAudio must be a local path or http(s) URL");
 		expect(validateMyNeuroProfile({ name: "X", age: 999 })).toContain("age out of range");
 	});
@@ -118,7 +121,12 @@ describe("TTSBridge", () => {
 	it("maps a provider error", async () => {
 		const fetchMock = vi.fn().mockResolvedValue(new Response("", { status: 500 }));
 		await expect(
-			synthesizeSpeech({ endpoint: "http://127.0.0.1:9880", speaker: "x" }, { text: "hi" }, true, fetchMock as unknown as typeof fetch),
+			synthesizeSpeech(
+				{ endpoint: "http://127.0.0.1:9880", speaker: "x" },
+				{ text: "hi" },
+				true,
+				fetchMock as unknown as typeof fetch,
+			),
 		).rejects.toMatchObject({ code: "provider-error" });
 	});
 
@@ -129,12 +137,16 @@ describe("TTSBridge", () => {
 
 	it("probes health and falls back to root", async () => {
 		const healthOk = vi.fn().mockResolvedValue(new Response("ok", { status: 200 }));
-		expect((await probeTTS("http://127.0.0.1:9880", healthOk as unknown as typeof fetch)).online).toBe(true);
+		expect(
+			(await probeTTS("http://127.0.0.1:9880", healthOk as unknown as typeof fetch)).online,
+		).toBe(true);
 		const noHealth = vi
 			.fn()
 			.mockRejectedValueOnce(new Error("404"))
 			.mockResolvedValueOnce(new Response("", { status: 200 }));
-		expect((await probeTTS("http://127.0.0.1:9880", noHealth as unknown as typeof fetch)).online).toBe(true);
+		expect(
+			(await probeTTS("http://127.0.0.1:9880", noHealth as unknown as typeof fetch)).online,
+		).toBe(true);
 	});
 
 	it("builds config from a companion", () => {
@@ -189,7 +201,9 @@ describe("MemoryBridge", () => {
 	});
 
 	it("pulls remote records during a sync", async () => {
-		const remote = { memos: [{ id: "r1", content: "remote note", createdAt: new Date().toISOString() }] };
+		const remote = {
+			memos: [{ id: "r1", content: "remote note", createdAt: new Date().toISOString() }],
+		};
 		const fetchMock = vi
 			.fn()
 			.mockResolvedValueOnce(new Response(JSON.stringify(remote), { status: 200 }))
