@@ -39,8 +39,14 @@ type Patterns = Pattern[];
 
 /** Rule-based extractors (OpenPerso uses LLM; we start free + instant). */
 const USER_PATTERNS: Patterns = [
-	{ re: /(?:my name is|i'm|i am|call me)\s+([A-Za-z가-힣]{1,20})\b/i, template: "user's name is {0}" },
-	{ re: /i (?:work|working) (?:as|at|in) (?:a |an |the )?([^.!?\n]{2,40})/i, template: "user works as/at {0}" },
+	{
+		re: /(?:my name is|i'm|i am|call me)\s+([A-Za-z가-힣]{1,20})\b/i,
+		template: "user's name is {0}",
+	},
+	{
+		re: /i (?:work|working) (?:as|at|in) (?:a |an |the )?([^.!?\n]{2,40})/i,
+		template: "user works as/at {0}",
+	},
 	{ re: /i (?:live|am living) in ([^.!?\n]{2,40})/i, template: "user lives in {0}" },
 	{ re: /i (?:like|love|enjoy) ([^.!?\n]{2,60})/i, template: "user likes {0}" },
 	{ re: /i (?:hate|dislike|can't stand) ([^.!?\n]{2,60})/i, template: "user dislikes {0}" },
@@ -49,10 +55,20 @@ const USER_PATTERNS: Patterns = [
 ];
 
 const COMPANION_PATTERNS: Patterns = [
-	{ re: /(?:please )?(?:always )?(?:call|refer to) me as ([A-Za-z가-힣]{1,20})\b/i, template: "prefers to be called {0}" },
-	{ re: /(?:speak|talk|reply) (?:to me )?in (korean|english|japanese|chinese|spanish)/i, template: "prefers replies in {0}" },
+	{
+		re: /(?:please )?(?:always )?(?:call|refer to) me as ([A-Za-z가-힣]{1,20})\b/i,
+		template: "prefers to be called {0}",
+	},
+	{
+		re: /(?:speak|talk|reply) (?:to me )?in (korean|english|japanese|chinese|spanish)/i,
+		template: "prefers replies in {0}",
+	},
 	{ re: /don'?t (?:be )?(?:too )?(formal|clingy|bossy|verbose)/i, template: "dislikes being {0}" },
-	{ re: /keep (?:it |your replies |responses )?short(?:er)?/i, template: "prefers short replies", noCapture: true },
+	{
+		re: /keep (?:it |your replies |responses )?short(?:er)?/i,
+		template: "prefers short replies",
+		noCapture: true,
+	},
 ];
 
 function newId(): string {
@@ -148,17 +164,19 @@ export function extractFactsFromMessage(companionId: string, message: string): n
 }
 
 /** Lightweight keyword-overlap retrieval (replaces pgvector for browser scope). */
-export function retrieveRelevantFacts(
-	companionId: string,
-	query: string,
-	limit = 8,
-): MemoryFact[] {
+export function retrieveRelevantFacts(companionId: string, query: string, limit = 8): MemoryFact[] {
 	const store = loadMemory();
 	const mem = store[companionId];
 	if (!mem?.facts.length) return [];
-	const qTokens = new Set(norm(query).split(/[^a-z0-9가-힣]+/).filter((t) => t.length > 2));
+	const qTokens = new Set(
+		norm(query)
+			.split(/[^a-z0-9가-힣]+/)
+			.filter((t) => t.length > 2),
+	);
 	const scored = mem.facts.map((f) => {
-		const fTokens = norm(f.text).split(/[^a-z0-9가-힣]+/).filter((t) => t.length > 2);
+		const fTokens = norm(f.text)
+			.split(/[^a-z0-9가-힣]+/)
+			.filter((t) => t.length > 2);
 		let overlap = 0;
 		for (const t of fTokens) if (qTokens.has(t)) overlap++;
 		// recency + usage boost, global facts slightly deprioritized for this companion
@@ -199,7 +217,9 @@ export function maybeSummarize(
 		const clean = content.replace(/\s+/g, " ").trim();
 		return `${role}: ${clean.length > 120 ? `${clean.slice(0, 117)}…` : clean}`;
 	};
-	const folded = slice.map((m) => compress(m.role === "user" ? "User" : "Companion", m.content)).join("\n");
+	const folded = slice
+		.map((m) => compress(m.role === "user" ? "User" : "Companion", m.content))
+		.join("\n");
 	const prev = mem.summary ? `${mem.summary}\n…\n` : "";
 	mem.summary = (prev + folded).slice(-MAX_SUMMARY_CHARS);
 	mem.summaryUpTo = messages.length;
@@ -222,7 +242,11 @@ export function buildMemoryBlock(companionId: string, currentMessage: string): s
 }
 
 /** Manual fact management (future settings UI). */
-export function addManualFact(companionId: string, text: string, scope: "global" | "companion" = "companion"): void {
+export function addManualFact(
+	companionId: string,
+	text: string,
+	scope: "global" | "companion" = "companion",
+): void {
 	const store = loadMemory();
 	addFact(store, companionId, scope, text, "manual");
 	saveMemory(store);

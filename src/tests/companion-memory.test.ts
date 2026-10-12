@@ -5,15 +5,15 @@
  */
 
 import {
-	extractFactsFromMessage,
-	retrieveRelevantFacts,
-	getAllFacts,
-	maybeSummarize,
-	buildMemoryBlock,
 	addManualFact,
-	deleteFact,
+	buildMemoryBlock,
 	clearCompanionMemory,
+	deleteFact,
+	extractFactsFromMessage,
+	getAllFacts,
 	loadMemory,
+	maybeSummarize,
+	retrieveRelevantFacts,
 } from "@/lib/companion-memory";
 
 // Node environment has no localStorage — install a minimal in-memory shim.
@@ -76,7 +76,9 @@ describe("retrieval", () => {
 
 	it("returns empty when nothing matches", () => {
 		extractFactsFromMessage(C, "My name is Mina.");
-		expect(retrieveRelevantFacts(C, "tell me about orbital mechanics and calculus")).toHaveLength(0);
+		expect(retrieveRelevantFacts(C, "tell me about orbital mechanics and calculus")).toHaveLength(
+			0,
+		);
 	});
 });
 

@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
-import type { CharacterCard } from "@/types/character";
 import type { AIHub } from "@/lib/ai-hub";
 import { validatePreset } from "@/lib/model-presets";
+import type { CharacterCard } from "@/types/character";
+import { useMemo, useState } from "react";
 
 /**
  * Library card tools: export to file, P2P share, recommended-model badge.

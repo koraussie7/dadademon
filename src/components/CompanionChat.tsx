@@ -142,7 +142,10 @@ export function CompanionChat({
 								<div className="min-w-0 flex-1">
 									<div className="text-sm font-medium truncate">{c.name}</div>
 									<div className="text-[11px] text-gray-500 truncate">
-										{c.personality?.[0] ?? (c.stage !== undefined ? STAGE_LABELS[c.stage] ?? "Companion" : "Companion")}
+										{c.personality?.[0] ??
+											(c.stage !== undefined
+												? (STAGE_LABELS[c.stage] ?? "Companion")
+												: "Companion")}
 									</div>
 								</div>
 							</button>
@@ -264,10 +267,7 @@ export function CompanionChat({
 							</h2>
 							{companion.stage !== undefined && (
 								<p className="text-xs text-cyan-400 mt-0.5">
-									{"★".repeat(companion.stage + 1)}{" "}
-									{STAGE_LABELS[
-										companion.stage
-									] ?? ""}
+									{"★".repeat(companion.stage + 1)} {STAGE_LABELS[companion.stage] ?? ""}
 								</p>
 							)}
 						</div>
@@ -278,7 +278,9 @@ export function CompanionChat({
 						<ProfileRow label="Occupation" value={companion.occupation} />
 						{companion.hobbies?.length ? (
 							<div>
-								<div className="text-[11px] uppercase tracking-wider text-gray-500 mb-1.5">Hobbies</div>
+								<div className="text-[11px] uppercase tracking-wider text-gray-500 mb-1.5">
+									Hobbies
+								</div>
 								<div className="flex flex-wrap gap-1.5">
 									{companion.hobbies.map((h) => (
 										<span
@@ -309,11 +311,7 @@ export function CompanionChat({
 							</div>
 						) : null}
 					</div>
-					{profileSlot && (
-						<div className="p-4 border-t border-white/10">
-							{profileSlot}
-						</div>
-					)}
+					{profileSlot && <div className="p-4 border-t border-white/10">{profileSlot}</div>}
 				</aside>
 			)}
 		</div>

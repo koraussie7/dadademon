@@ -79,4 +79,3 @@ export function CharacterGallery({ cards, onSelect, onDelete }: Props) {
 		</div>
 	);
 }
-

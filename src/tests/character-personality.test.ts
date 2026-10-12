@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
 import { CharacterCardParser } from "@/lib/character-card";
 import { PersonalityEngine } from "@/lib/personality-engine";
 import type { CharacterCard } from "@/types/character";
+import { describe, expect, it } from "vitest";
 
 describe("CharacterCardParser", () => {
 	it("parses valid JSON character card", () => {

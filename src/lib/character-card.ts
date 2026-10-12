@@ -7,6 +7,7 @@
  * - SillyTavern extension fields (scenario, first_mes, etc.)
  */
 
+import type { CompanionProfile } from "@/components/CompanionChat";
 import type {
 	CharacterCard,
 	CharacterCardData,
@@ -14,7 +15,6 @@ import type {
 	ParsedCharacterCard,
 } from "@/types/character";
 import { STAGE_ORDER } from "@/types/character";
-import type { CompanionProfile } from "@/components/CompanionChat";
 
 const REQUIRED_FIELDS = ["name"] as const;
 
@@ -99,9 +99,7 @@ export class CharacterCardParser {
 
 					while (offset < view.byteLength && !found) {
 						const length = view.getUint32(offset);
-						const chunkType = new TextDecoder().decode(
-							new Uint8Array(arrayBuf, offset + 4, 4),
-						);
+						const chunkType = new TextDecoder().decode(new Uint8Array(arrayBuf, offset + 4, 4));
 
 						if (chunkType === "caID" || chunkType === "chara") {
 							const chunkData = new Uint8Array(arrayBuf, offset + 8, length);
@@ -175,9 +173,7 @@ export class CharacterCardParser {
 		const tags = data.tags || [];
 		const stage = CharacterCardParser.determineStage(tags, data.extensions);
 
-		const personality = data.personality
-			? data.personality.split("\n").filter(Boolean)
-			: [];
+		const personality = data.personality ? data.personality.split("\n").filter(Boolean) : [];
 
 		const hobbies = data.tags
 			? data.tags.filter((t) => !STAGE_TAG_MAP[t.toLowerCase()]).slice(0, 4)
@@ -302,7 +298,7 @@ export class CharacterCardParser {
 
 	private static extractAge(description: string): number | undefined {
 		const match = description.match(/(\d{2})\s*(?:years?\s*(?:old)?)?/i);
-		return match ? parseInt(match[1]) : undefined;
+		return match ? Number.parseInt(match[1]) : undefined;
 	}
 
 	private static extractOccupation(_description: string): string | undefined {

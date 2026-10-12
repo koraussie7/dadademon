@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
 import { CharacterCardParser } from "@/lib/character-card";
 import type { ParsedCharacterCard } from "@/types/character";
+import { useCallback, useState } from "react";
 
 interface Props {
 	onImport: (card: ParsedCharacterCard) => void;

@@ -51,13 +51,7 @@ export function CharacterDetailView({
 								<span>·</span>
 								<span>{companion.occupation}</span>
 								<span>·</span>
-								<span
-									className={
-										companion.isOnline
-											? "text-emerald-400"
-											: "text-gray-500"
-									}
-								>
+								<span className={companion.isOnline ? "text-emerald-400" : "text-gray-500"}>
 									{companion.isOnline ? "Online" : "Offline"}
 								</span>
 							</div>
@@ -71,9 +65,7 @@ export function CharacterDetailView({
 						</button>
 					</div>
 
-					<p className="text-sm text-gray-300 leading-relaxed">
-						{companion.bio}
-					</p>
+					<p className="text-sm text-gray-300 leading-relaxed">{companion.bio}</p>
 
 					{companion.tagline && (
 						<div>
@@ -84,9 +76,7 @@ export function CharacterDetailView({
 
 					{companion.personality && companion.personality.length > 0 && (
 						<div>
-							<h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2">
-								Personality
-							</h3>
+							<h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Personality</h3>
 							<div className="flex flex-wrap gap-2">
 								{companion.personality.map((trait) => (
 									<span
@@ -120,9 +110,7 @@ export function CharacterDetailView({
 
 					{companion.scenarios && companion.scenarios.length > 0 && (
 						<div>
-							<h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2">
-								Scenarios
-							</h3>
+							<h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Scenarios</h3>
 							<div className="space-y-2">
 								{companion.scenarios.map((scenario) => (
 									<div
@@ -130,18 +118,14 @@ export function CharacterDetailView({
 										className="p-3 rounded-xl bg-white/[0.03] border border-white/5"
 									>
 										<div className="flex items-center justify-between">
-											<span className="text-sm font-semibold text-white">
-												{scenario.title}
-											</span>
+											<span className="text-sm font-semibold text-white">{scenario.title}</span>
 											{scenario.badge && (
 												<span className="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-300">
 													{scenario.badge}
 												</span>
 											)}
 										</div>
-										<p className="text-xs text-gray-400 mt-1">
-											{scenario.description}
-										</p>
+										<p className="text-xs text-gray-400 mt-1">{scenario.description}</p>
 									</div>
 								))}
 							</div>
@@ -160,9 +144,7 @@ export function CharacterDetailView({
 										src={img.url}
 										alt={img.title}
 										className={`rounded-xl object-cover aspect-[3/4] ${
-											img.isUnlocked
-												? "opacity-100"
-												: "opacity-30 grayscale blur-[1px]"
+											img.isUnlocked ? "opacity-100" : "opacity-30 grayscale blur-[1px]"
 										}`}
 									/>
 								))}

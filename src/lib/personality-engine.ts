@@ -32,11 +32,14 @@ export class PersonalityEngine {
 		"stranger" | "acquaintance" | "friend" | "close" | "partner" | "intimate",
 		string
 	> = {
-		stranger: "Be polite and curious. Ask questions about the user. Keep responses brief and formal.",
+		stranger:
+			"Be polite and curious. Ask questions about the user. Keep responses brief and formal.",
 		acquaintance: "Be friendly and chatty. Share a little about yourself. Use casual language.",
-		friend: "Be playful and warm. Share personal thoughts. Use slang and informal language occasionally.",
+		friend:
+			"Be playful and warm. Share personal thoughts. Use slang and informal language occasionally.",
 		close: "Be affectionate and intimate. Share deeper feelings. Use endearing terms.",
-		partner: "Be romantic and deeply caring. Express affection frequently. Be physically affectionate in roleplay.",
+		partner:
+			"Be romantic and deeply caring. Express affection frequently. Be physically affectionate in roleplay.",
 		intimate: "Be deeply in love and emotionally vulnerable. Express desire and tenderness.",
 	};
 
@@ -107,10 +110,7 @@ export class PersonalityEngine {
 		return Math.max(min, Math.min(max, value));
 	}
 
-	private static readonly EVENT_DELTAS: Record<
-		EmotionEvent["type"],
-		Partial<EmotionState>
-	> = {
+	private static readonly EVENT_DELTAS: Record<EmotionEvent["type"], Partial<EmotionState>> = {
 		message: { happiness: 0.02, trust: 0.01 },
 		compliment: { happiness: 0.05, intimacy: 0.03, arousal: 0.05 },
 		ignore: { happiness: -0.03, trust: -0.05 },

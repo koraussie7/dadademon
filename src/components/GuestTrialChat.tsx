@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { markGuestTrialSeen, useGuestChat } from "@/lib/guest-chat";
 import type { CharacterCard } from "@/types/character";
-import { useGuestChat, markGuestTrialSeen } from "@/lib/guest-chat";
+import { useState } from "react";
 
 /**
  * Guest trial chat panel — 3 free messages, no signup (OpenPerso Phase 3).
@@ -95,43 +95,43 @@ export function GuestTrialChat({ card }: { card: CharacterCard }) {
 						</p>
 					)}
 					<div className="flex gap-2">
-					<input
-						type="text"
-						value={draft}
-						onChange={(e) => setDraft(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter" && !busy && draft.trim()) {
-								send(draft);
-								setDraft("");
-							}
-						}}
-						placeholder="Type a message…"
-						maxLength={500}
-						className="flex-1 rounded-xl bg-[#13141f] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-pink-500/50"
-					/>
-					{busy ? (
-						<button
-							type="button"
-							onClick={cancel}
-							className="rounded-xl bg-white/10 px-3 py-2 text-xs text-white"
-						>
-							Stop
-						</button>
-					) : (
-						<button
-							type="button"
-							onClick={() => {
-								if (draft.trim()) {
+						<input
+							type="text"
+							value={draft}
+							onChange={(e) => setDraft(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" && !busy && draft.trim()) {
 									send(draft);
 									setDraft("");
 								}
 							}}
-							disabled={!canChat || !draft.trim()}
-							className="rounded-xl bg-pink-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
-						>
-							Send
-						</button>
-					)}
+							placeholder="Type a message…"
+							maxLength={500}
+							className="flex-1 rounded-xl bg-[#13141f] border border-white/10 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-pink-500/50"
+						/>
+						{busy ? (
+							<button
+								type="button"
+								onClick={cancel}
+								className="rounded-xl bg-white/10 px-3 py-2 text-xs text-white"
+							>
+								Stop
+							</button>
+						) : (
+							<button
+								type="button"
+								onClick={() => {
+									if (draft.trim()) {
+										send(draft);
+										setDraft("");
+									}
+								}}
+								disabled={!canChat || !draft.trim()}
+								className="rounded-xl bg-pink-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+							>
+								Send
+							</button>
+						)}
 					</div>
 				</>
 			)}
