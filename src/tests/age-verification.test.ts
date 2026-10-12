@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { AgeVerification, NSFWFilter } from "@/lib/age-verification";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const storageMap = new Map<string, string>();
 

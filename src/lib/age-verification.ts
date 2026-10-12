@@ -7,7 +7,12 @@
 
 export type AgeCheckResult = {
 	verified: boolean;
-	method: "unverified" | "self_declaration" | "id_verification" | "p2p_consensus" | "parental_block";
+	method:
+		| "unverified"
+		| "self_declaration"
+		| "id_verification"
+		| "p2p_consensus"
+		| "parental_block";
 	age?: number;
 	blocked: boolean;
 	reason?: string;
@@ -167,8 +172,8 @@ export class AgeVerification {
 	extractAgeFromText(text: string): number | null {
 		for (const pattern of AGE_DECLARATION_PATTERNS) {
 			const match = text.match(pattern);
-			if (match && parseInt(match[1]) > 0) {
-				return parseInt(match[1]);
+			if (match && Number.parseInt(match[1]) > 0) {
+				return Number.parseInt(match[1]);
 			}
 		}
 		return null;
@@ -182,8 +187,8 @@ export class AgeVerification {
 	static extractAgeStatic(text: string): number | null {
 		for (const pattern of AGE_DECLARATION_PATTERNS) {
 			const match = text.match(pattern);
-			if (match && parseInt(match[1]) > 0) {
-				return parseInt(match[1]);
+			if (match && Number.parseInt(match[1]) > 0) {
+				return Number.parseInt(match[1]);
 			}
 		}
 		return null;

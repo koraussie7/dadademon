@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { isGuestModeAllowed } from "@/lib/guest-policy";
+import { describe, expect, it } from "vitest";
 
 describe("guest mode policy", () => {
 	it("allows browsing without auth on public routes", () => {
