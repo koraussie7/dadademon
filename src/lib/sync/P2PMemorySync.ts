@@ -54,7 +54,6 @@ export class P2PMemorySync {
 	private callbacks: SyncCallbacks;
 	private isConnected = false;
 	private peerCount = 0;
-	private pendingOperations: SyncOperation[] = [];
 	private vectorClock: Record<string, number> = {};
 
 	constructor(config: P2PSyncConfig, callbacks: SyncCallbacks = {}) {
@@ -142,7 +141,6 @@ export class P2PMemorySync {
 			this.provider.on("synced", (event: { synced: boolean }) => {
 				if (event.synced) {
 					this.updateSyncStatus("idle");
-					this.pushPendingOperations();
 				}
 			});
 		} catch (error) {
@@ -151,52 +149,17 @@ export class P2PMemorySync {
 		}
 	}
 
-	private handleLocalChange(entityType: string, event: Y.YEvent<any>): void {
+	private handleLocalChange(_entityType: string, event: Y.YEvent<any>): void {
 		if (event.transaction.origin !== null) return; // 로컬 변경만 처리
 
-		const operation: SyncOperation = {
-			id: `${this.companionId}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-			type: "update",
-			entityType: entityType as any,
-			entityId: this.companionId,
-			data: this.getEntityData(entityType),
-			timestamp: Date.now(),
-			vectorClock: { ...this.vectorClock },
-		};
-
-		this.pendingOperations.push(operation);
+		// Yjs observers already broadcast local edits to remote peers via the
+		// WebrtcProvider; we only need to bump the local vector clock so the
+		// SyncOperation payload stays consistent if a real push is added later.
 		this.incrementVectorClock();
-
-		if (this.isConnected) {
-			this.pushPendingOperations();
-		}
-	}
-
-	private getEntityData(entityType: string): any {
-		switch (entityType) {
-			case "memory":
-				return this.yMemory.toArray();
-			case "relationship":
-				return Object.fromEntries(this.yRelationship.entries());
-			case "gallery":
-				return this.yGallery.toArray();
-			case "metadata":
-				return Object.fromEntries(this.yMetadata.entries());
-			default:
-				return null;
-		}
 	}
 
 	private incrementVectorClock(): void {
 		this.vectorClock[this.companionId] = (this.vectorClock[this.companionId] || 0) + 1;
-	}
-
-	private pushPendingOperations(): void {
-		if (!this.isConnected || this.pendingOperations.length === 0) return;
-
-		// Yjs가 자동으로 브로드캐스트하므로 별도 푸시 불필요
-		// 여기서는 벡터 클록 업데이트만
-		this.pendingOperations = [];
 	}
 
 	private updateSyncStatus(status: SyncState["status"], error?: string): void {
@@ -419,7 +382,7 @@ export class P2PMemorySync {
 		return {
 			companionId: this.companionId,
 			lastSyncedAt: this.ySyncState.get("lastSyncedAt") || 0,
-			pendingChanges: this.pendingOperations.length,
+			pendingChanges: 0,
 			conflictCount: this.ySyncState.get("conflictCount") || 0,
 			status: this.ySyncState.get("status") || "idle",
 			error: this.ySyncState.get("error"),
