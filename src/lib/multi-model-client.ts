@@ -116,6 +116,17 @@ const DEFAULT_ENDPOINTS: ModelEndpoint[] = [
 		timeout: 30000,
 		enabled: false,
 	},
+	{
+		// TierMux proxy: multi-provider auto-failover on deploy target
+		// (172.20.10.197:11435). Pools 49 free-tier providers with cooldown
+		// and quarantine routing logic (ported from mainulBUBT/TierMux).
+		name: "tier-mux",
+		url: `${import.meta.env.VITE_TIERMUX_PROXY_URL || "http://172.20.10.197:11435"}/v1/chat/completions`,
+		models: ["gpt-4o-mini", "gpt-4o", "claude-3-5-sonnet", "claude-3-5-haiku", "gemini-2.0-flash", "llama-3.1-8b-instant", "smart", "auto"],
+		priority: 6,
+		timeout: 30000,
+		enabled: !!import.meta.env.VITE_TIERMUX_PROXY_URL,
+	},
 ];
 
 export class MultiModelChatClient {

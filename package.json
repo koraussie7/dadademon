@@ -14,7 +14,9 @@
     "lint:fix": "biome check --write src --max-diagnostics=100",
     "deploy": "bash scripts/deploy.sh",
     "deploy:dry": "bash scripts/deploy.sh --dry-run",
-    "deploy:skip-build": "bash scripts/deploy.sh --skip-build"
+    "deploy:skip-build": "bash scripts/deploy.sh --skip-build",
+    "deploy:proxy": "bash scripts/deploy-proxy.sh",
+    "tiermux:dev": "node --import tsx src/lib/providers/tiermux-proxy.ts"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.85",

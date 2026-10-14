@@ -18,6 +18,11 @@ export {
 	createTogetherProvider,
 	type CloudProviderConfig,
 } from "./CloudInferenceProvider";
+export {
+	TierMuxCloudProvider,
+	createTierMuxProvider,
+	type TierMuxCloudConfig,
+} from "./TierMuxCloudProvider";
 
 import type { AIHub } from "@/lib/ai-hub";
 import type { TrysteroP2PClient } from "@/lib/trystero-client";
@@ -25,13 +30,15 @@ import type { InferenceProvider } from "@/types/unified";
 import { CloudInferenceProvider } from "./CloudInferenceProvider";
 import { LocalInferenceProvider } from "./LocalInferenceProvider";
 import { P2PInferenceProvider } from "./P2PInferenceProvider";
+import { TierMuxCloudProvider, createTierMuxProvider } from "./TierMuxCloudProvider";
 
-export type ProviderType = "p2p" | "local" | "cloud";
+export type ProviderType = "p2p" | "local" | "cloud" | "tier-mux";
 
 export interface ProviderRegistry {
 	p2p: P2PInferenceProvider | null;
 	local: LocalInferenceProvider | null;
 	cloud: CloudInferenceProvider | null;
+	"tier-mux": TierMuxCloudProvider | null;
 }
 
 export class ProviderManager {
@@ -39,13 +46,15 @@ export class ProviderManager {
 		p2p: null,
 		local: null,
 		cloud: null,
+		"tier-mux": null,
 	};
 
 	private activeProvider: ProviderType = "p2p";
-	private fallbackOrder: ProviderType[] = ["p2p", "local", "cloud"];
+	private fallbackOrder: ProviderType[] = ["p2p", "local", "cloud", "tier-mux"];
 
 	constructor(aiHub: AIHub, trysteroClient: TrysteroP2PClient | null = null) {
 		this.registry.p2p = new P2PInferenceProvider(aiHub, trysteroClient);
+		this.registry["tier-mux"] = createTierMuxProvider();
 	}
 
 	// 로컬 프로바이더 초기화
@@ -109,6 +118,22 @@ export class ProviderManager {
 		}
 
 		this.registry.cloud = cloudProvider!;
+	}
+
+	/** Initialize TierMux multi-provider cloud fallback with API keys. */
+	setupTierMux(providerKeys?: Record<string, string | string[]>, defaultModel?: string): void {
+		this.registry["tier-mux"] = createTierMuxProvider(defaultModel);
+		this.registry["tier-mux"]!.updateConfig({ providerKeys });
+	}
+
+	/** Get the TierMux provider instance. */
+	getTierMuxProvider(): TierMuxCloudProvider | null {
+		return this.registry["tier-mux"];
+	}
+
+	/** Reset all cooldown/quarantine state on the TierMux provider. */
+	resetTierMuxRouting(): void {
+		this.registry["tier-mux"]?.resetRoutingState();
 	}
 
 	// 활성 프로바이더 변경
@@ -195,5 +220,6 @@ export class ProviderManager {
 		if (this.registry.local) {
 			await this.registry.local.dispose();
 		}
+		this.registry["tier-mux"]?.resetRoutingState();
 	}
 }

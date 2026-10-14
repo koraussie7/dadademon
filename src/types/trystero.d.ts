@@ -1,5 +1,6 @@
 interface ImportMetaEnv {
 	readonly VITE_REGION?: string;
+	readonly VITE_TIERMUX_PROXY_URL?: string;
 }
 
 interface ImportMeta {
