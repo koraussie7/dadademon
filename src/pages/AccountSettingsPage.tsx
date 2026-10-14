@@ -2,8 +2,10 @@ import { ByokManager } from "@/components/ByokManager";
 import { MemosSyncPanel } from "@/components/MemosSyncPanel";
 import { MyNeuroPanel } from "@/components/MyNeuroPanel";
 import { P2PSyncPanel } from "@/components/P2PSyncPanel";
+import { SharedProfilePanel } from "@/components/SharedProfilePanel";
+import { LettaClient } from "@/lib/letta-client";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Props {
 	onBack?: () => void;
@@ -22,7 +24,29 @@ const API_URL =
  */
 const P2P_SYNC_COMPANION_ID = "account";
 
+const LETTA_AGENT_PREFIX = "privseai_letta_agent_";
+
+/**
+ * Scan localStorage for all Letta agent mappings (companionId → agentId).
+ * Used by SharedProfilePanel to sync the shared human block to all agents.
+ */
+function getLettaAgentMap(): Array<{ companionId: string; agentId: string }> {
+	const result: Array<{ companionId: string; agentId: string }> = [];
+	if (typeof localStorage === "undefined") return result;
+	for (let i = 0; i < localStorage.length; i++) {
+		const key = localStorage.key(i);
+		if (!key?.startsWith(LETTA_AGENT_PREFIX)) continue;
+		const companionId = key.slice(LETTA_AGENT_PREFIX.length);
+		const agentId = localStorage.getItem(key);
+		if (agentId) {
+			result.push({ companionId, agentId });
+		}
+	}
+	return result;
+}
+
 export function AccountSettingsPage({ onBack }: Props) {
+	const lettaAgentMap = useMemo(getLettaAgentMap, []);
 	const { user, quota, loading: authLoading, refresh } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -210,6 +234,12 @@ export function AccountSettingsPage({ onBack }: Props) {
 
 				{/* BYOK Section — user's own AI provider keys (localStorage only) */}
 				<ByokManager />
+
+				{/* Shared Human Memory Block — Character.AI pattern */}
+				<SharedProfilePanel
+					lettaBaseUrl={LettaClient.getConfigFromEnv().baseUrl}
+					agentIds={lettaAgentMap}
+				/>
 
 				{/* Security Section */}
 				<div className="bg-[#12141e] border border-white/10 rounded-3xl p-6">

@@ -1,5 +1,6 @@
 import { ByokManager } from "@/components/ByokManager";
 import { NexusPairingModal } from "@/components/NexusPairingModal";
+import { ResetMemoryButton } from "@/components/ResetMemoryButton";
 import { TTSButton } from "@/components/TTSButton";
 import type { CandyCompanion } from "@/data/candyPresets";
 import { type ByokProviderId, byokProvidersReady } from "@/lib/byok-store";
@@ -22,6 +23,8 @@ interface Props {
 	onSelectCompanion: (id: string) => void;
 	onSendMessage: (text: string) => Promise<string>;
 	onStageProgress?: (newStage: number) => void;
+	onResetMemory?: () => void;
+	lettaBaseUrl?: string;
 	webGpuEnabled?: boolean;
 	webGpuState?: {
 		status: "idle" | "loading" | "ready" | "error";
@@ -58,6 +61,8 @@ export function CandyChat({
 	webGpuState = { status: "idle", progress: 0, message: "" },
 	onEnableWebGpu,
 	onDisableWebGpu,
+	lettaBaseUrl,
+	onResetMemory,
 }: Props) {
 	const [messages, setMessages] = useState<CandyMessage[]>([]);
 	const [input, setInput] = useState("");
@@ -883,6 +888,18 @@ export function CandyChat({
 										대화를 나누거나 선물을 보내면 다음 레벨의 특별한 사진과 시나리오가 해금됩니다.
 									</p>
 								</div>
+
+								{/* Reset Memory Button */}
+								{onResetMemory && (
+									<div className="pt-2">
+										<ResetMemoryButton
+											companionId={companion.id}
+											companionName={companion.name}
+											lettaBaseUrl={lettaBaseUrl}
+											onResetComplete={onResetMemory}
+										/>
+									</div>
+								)}
 
 								{/* Bio */}
 								<div>

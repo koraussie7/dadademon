@@ -137,6 +137,8 @@ export class LettaClient {
 			model_endpoint_type?: string;
 			api_key?: string;
 		};
+		memory_guard?: boolean;
+		identity_id?: string;
 	}): Promise<LettaAgent | null> {
 		try {
 			const res = await fetch(this.buildUrl("/v1/agents/"), {
@@ -152,6 +154,12 @@ export class LettaClient {
 					})),
 					system_prompt: request.system_prompt,
 					llm_config: request.llm_config,
+					metadata: {
+						memory_guard: request.memory_guard ?? true,
+						...(request.identity_id
+							? { identity_id: request.identity_id }
+							: {}),
+					},
 				}),
 			});
 

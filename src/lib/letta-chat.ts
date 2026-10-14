@@ -58,8 +58,10 @@ export async function tryLettaChat(
 	// Find or create agent for this companion
 	let agentId = localStorage.getItem(`privseai_letta_agent_${companionId}`) ?? null;
 
-	if (!agentId) {
-		// Create a new agent with the companion's system prompt and memory blocks
+		if (!agentId) {
+		// Create a new agent with the companion's system prompt and memory blocks.
+		// memory_guard=true disables Letta's background memory consolidation to
+		// protect stored facts from auto-rewriting (GENOME.md Dream Engine OFF).
 		const agent = await client.createAgent({
 			name: getAgentName(companionId, companionName),
 			memory_blocks: [
@@ -73,6 +75,7 @@ export async function tryLettaChat(
 			llm_config: {
 				model: "gpt-4o-mini",
 			},
+			memory_guard: true,
 		});
 
 		if (!agent?.id) {
@@ -136,12 +139,13 @@ export async function* tryLettaChatStream(
 
 	let agentId = localStorage.getItem(`privseai_letta_agent_${companionId}`) ?? null;
 
-	if (!agentId) {
+		if (!agentId) {
 		const agent = await client.createAgent({
 			name: getAgentName(companionId, companionName),
 			memory_blocks: [{ label: "human", value: systemPrompt, persisted: true }],
 			system_prompt: systemPrompt,
 			llm_config: { model: "gpt-4o-mini" },
+			memory_guard: true,
 		});
 		if (!agent?.id) {
 			yield { content: "", done: true };

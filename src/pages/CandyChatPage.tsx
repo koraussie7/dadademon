@@ -568,6 +568,10 @@ ${memoryBlock}`
 				webGpuState={webGpuState}
 				onEnableWebGpu={enableWebGpu}
 				onDisableWebGpu={disableWebGpu}
+				lettaBaseUrl={LettaClient.getConfigFromEnv().baseUrl}
+				onResetMemory={() => {
+					window.location.reload();
+				}}
 				onSendMessage={(message) => {
 					const replyP = onSendMessage(message);
 					replyP

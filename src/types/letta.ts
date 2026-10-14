@@ -96,6 +96,14 @@ export interface LettaCreateAgentRequest {
 	tools?: LettaTool[];
 	system_prompt?: string;
 	metadata?: Record<string, unknown>;
+	identity_id?: string;
+	/**
+	 * When true, the agent's memory blocks are never auto-summarized or
+	 * auto-reorganized by Letta's background consolidation loop. Required
+	 * to satisfy GENOME.md's "Dream Engine OFF" invariant: stored memory
+	 * must remain verbatim, never rewritten by background LLM processes.
+	 */
+	memory_guard?: boolean;
 }
 
 export interface LettaSendMessageRequest {
