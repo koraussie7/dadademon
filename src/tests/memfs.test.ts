@@ -152,7 +152,7 @@ describe("MemFS", () => {
 			});
 
 			expect(results.length).toBeGreaterThan(0);
-			expect(memfs.exists("memory/facts/comp-01.md")).toBe(true);
+			expect(memfs.exists(MEMFS_PATHS.facts("comp-01"))).toBe(true);
 		});
 
 		it("returns empty for missing localStorage key", () => {
