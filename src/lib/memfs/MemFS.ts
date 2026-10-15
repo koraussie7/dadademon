@@ -407,12 +407,22 @@ export class MemFS {
 
 	clear(): void {
 		if (this.useGit) {
-			const gitDir = join(this.workDir, ".git");
-			if (existsSync(gitDir)) {
-				rmSync(gitDir, { recursive: true, force: true });
-			}
-			if (existsSync(this.workDir)) {
+			// Remove the work dir in one shot; it contains .git. Two separate
+			// rmSync calls raced under parallel vitest workers (a peer recreated
+			// .git between the two removals), so retry once before giving up.
+			try {
 				rmSync(this.workDir, { recursive: true, force: true });
+			} catch (err) {
+				const code = (err as NodeJS.ErrnoException | null)?.code;
+				if (code === "ENOTEMPTY" || code === "EPERM" || code === "EBUSY") {
+					try {
+						rmSync(this.workDir, { recursive: true, force: true });
+					} catch {
+						// Best effort: leave the directory for the next run to reclaim.
+					}
+				} else {
+					throw err;
+				}
 			}
 		} else {
 			jsGitAdapter.clear(this.workDir);

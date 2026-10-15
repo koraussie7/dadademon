@@ -11,3 +11,7 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# MemFS runtime state (git-backed memory filesystem)
+.memfs/
+.memfs-test-*/
