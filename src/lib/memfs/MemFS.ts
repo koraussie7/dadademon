@@ -278,16 +278,16 @@ export class MemFS {
 
 	list(dir: string): string[] {
 		if (this.useGit) {
-			const targetDir = join(this.workDir, dir);
-			if (!existsSync(targetDir)) return [];
+			const normalizedDir = dir.replace(/\/+$/, "");
 			try {
-				return execSync("git ls-tree --name-only HEAD .", {
-					cwd: targetDir,
+				return execSync("git ls-tree -r --name-only HEAD", {
+					cwd: this.workDir,
 					stdio: "pipe",
 				})
 					.toString()
 					.split("\n")
-					.filter(Boolean);
+					.filter(Boolean)
+					.filter((f) => f === normalizedDir || f.startsWith(`${normalizedDir}/`));
 			} catch {
 				return [];
 			}
