@@ -15,13 +15,46 @@
 // a bare module specifier, so we must not statically import it — Vite would
 // inline the specifier into the main bundle and the browser would fail with
 // "Module not found". We load it lazily inside getPipeline() instead.
-type GenerationOptions = unknown;
-type TextGenerationPipeline = unknown;
-let _pipeline: ((...args: unknown[]) => Promise<unknown>) | null = null;
-async function getPipeline(): Promise<
-	(task: string, model: string, opts?: Record<string, unknown>) => Promise<unknown>
-> {
-	if (_pipeline) return _pipeline as never;
+interface TransformersProgress {
+	progress: number;
+	status: string;
+}
+
+interface TransformersGenerationOptions {
+	max_new_tokens?: number;
+	temperature?: number;
+	top_p?: number;
+	top_k?: number;
+	do_sample?: boolean;
+	repetition_penalty?: number;
+	[key: string]: unknown;
+}
+
+interface TransformersChatMessage {
+	role: "system" | "user" | "assistant";
+	content: string;
+}
+
+interface TransformersGenerationResult {
+	generated_text: string | TransformersChatMessage[];
+}
+
+export interface TextGenerationPipeline {
+	(
+		messages: TransformersChatMessage[],
+		options?: TransformersGenerationOptions,
+	): Promise<TransformersGenerationResult[]>;
+}
+
+type PipelineFactory = (
+	task: string,
+	model: string,
+	opts?: Record<string, unknown>,
+) => Promise<TextGenerationPipeline>;
+
+let _pipeline: PipelineFactory | null = null;
+async function getPipeline(): Promise<PipelineFactory | null> {
+	if (_pipeline) return _pipeline;
 	// Load Transformers.js lazily. The specifier is held in a variable and
 	// marked @vite-ignore so Vite does NOT try to statically resolve/bundle it
 	// at build time (the package may not be installed, and inlining this heavy
@@ -32,13 +65,16 @@ async function getPipeline(): Promise<
 	const specifier = "@xenova/transformers";
 	try {
 		const mod = await import(/* @vite-ignore */ specifier);
-		_pipeline = ((mod as { pipeline?: unknown }).pipeline ??
-			(mod as { default?: unknown }).default) as never;
+		const pipelineFn =
+			(mod as { pipeline?: PipelineFactory }).pipeline ??
+			(mod as { default?: PipelineFactory }).default;
+		if (!pipelineFn) return null;
+		_pipeline = pipelineFn;
 	} catch {
 		// Optional dependency missing at runtime — disable on-device inference.
-		return null as never;
+		return null;
 	}
-	return _pipeline as never;
+	return _pipeline;
 }
 
 export interface OnDeviceGenerateOptions {
@@ -190,14 +226,14 @@ export class OnDeviceLLMClient {
 			const generated = await p("text-generation", this.modelId, {
 				device: "webgpu", // Try WebGPU first, fallback to wasm
 				dtype: "q4", // Use 4-bit quantization
-				progress_callback: (progress: { progress: number; status: string }) => {
+				progress_callback: (progress: TransformersProgress) => {
 					this.loadProgress = Math.round(progress.progress * 100);
 					console.log(
 						`[OnDeviceLLM] Loading ${this.modelId}: ${progress.status} (${this.loadProgress}%)`,
 					);
 				},
 			});
-			this.generator = generated as unknown as TextGenerationPipeline;
+			this.generator = generated;
 
 			this.loadProgress = 100;
 			this.isLoading = false;
@@ -236,7 +272,7 @@ export class OnDeviceLLMClient {
 		const { maxTokens = 512, temperature = 0.7, topP = 0.9, topK = 50, onToken } = options;
 
 		try {
-			const messages = [
+			const messages: TransformersChatMessage[] = [
 				{
 					role: "system",
 					content:
@@ -245,7 +281,7 @@ export class OnDeviceLLMClient {
 				{ role: "user", content: prompt },
 			];
 
-			const generationOptions: GenerationOptions = {
+			const generationOptions: TransformersGenerationOptions = {
 				max_new_tokens: maxTokens,
 				temperature,
 				top_p: topP,
@@ -254,14 +290,9 @@ export class OnDeviceLLMClient {
 				repetition_penalty: 1.1,
 			};
 
-			const result = await (
-				this.generator as unknown as (
-					m: unknown,
-					o: unknown,
-				) => Promise<{ generated_text: string }[]>
-			)(messages, generationOptions);
-			const generatedText = result[0]?.generated_text || "";
-			const assistantResponse = this.extractAssistantResponse(generatedText, prompt);
+			const result = await this.generator(messages, generationOptions);
+			const generatedText = result[0]?.generated_text ?? "";
+			const assistantResponse = this.extractAssistantResponse(generatedText, messages);
 
 			if (onToken) {
 				// Emit tokens character by character as a rough approximation
@@ -293,25 +324,48 @@ export class OnDeviceLLMClient {
 	}
 
 	/**
-	 * Extract only the assistant's response from the generated text
+	 * Extract only the assistant's response from the generated text.
+	 *
+	 * transformers.js returns chat-template-aware outputs as an array of
+	 * messages; for raw text-generation pipelines we split on role markers
+	 * ("assistant:" / "ai:") rather than substring-matching the prompt, which
+	 * fails whenever the model echoes or rephrases the input.
 	 */
-	private extractAssistantResponse(generatedText: string, originalPrompt: string): string {
-		// Try to find the assistant's response after the user prompt
-		const promptEnd = generatedText.lastIndexOf(originalPrompt);
-		if (promptEnd !== -1) {
-			const afterPrompt = generatedText.slice(promptEnd + originalPrompt.length);
-			// Look for assistant markers
-			const assistantMarkers = ["Assistant:", "assistant:", "AI:", "ai:"];
-			for (const marker of assistantMarkers) {
-				const idx = afterPrompt.indexOf(marker);
-				if (idx !== -1) {
-					return afterPrompt.slice(idx + marker.length).trim();
-				}
-			}
-			// If no marker, return everything after the prompt
-			return afterPrompt.trim();
+	private extractAssistantResponse(
+		generatedText: string | TransformersChatMessage[],
+		inputMessages: TransformersChatMessage[],
+	): string {
+		// Chat-template path: the pipeline appends an assistant message to the
+		// input list. Return only the new one.
+		if (Array.isArray(generatedText)) {
+			const inputLen = inputMessages.length;
+			const newMessages = generatedText.slice(inputLen);
+			if (newMessages.length === 0) return "";
+			const last = newMessages[newMessages.length - 1];
+			return last?.content?.trim() ?? "";
 		}
-		return generatedText.trim();
+
+		const text = generatedText.trim();
+		if (!text) return "";
+
+		// Split on the first assistant-style role marker so we ignore the
+		// echoed system + user prompt that the raw text-generation pipeline
+		// re-emits before the model's actual reply.
+		const assistantMarkers = ["<|assistant|>", "|assistant|", "Assistant:", "assistant:", "AI:", "ai:"];
+		for (const marker of assistantMarkers) {
+			const idx = text.indexOf(marker);
+			if (idx !== -1) {
+				const after = text.slice(idx + marker.length).trim();
+				// Strip a trailing end-of-turn token if the template emits one.
+				const endTokenIdx = after.search(/<\|end\|>|<\|endoftext\|>|<\/s>/i);
+				return endTokenIdx === -1 ? after : after.slice(0, endTokenIdx).trim();
+			}
+		}
+
+		// No marker found — assume the model only emitted the reply and the
+		// prompt was stripped, so return as-is rather than risk dropping the
+		// real content with a faulty substring match.
+		return text;
 	}
 
 	/**
