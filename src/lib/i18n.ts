@@ -191,3 +191,16 @@ export function useI18n(): I18nApi {
 
 	return { t, tPlural, locale, setLocale, ready };
 }
+
+
+// ---------- Commits page ------------------------------------------
+export const commits: TranslationTree = {
+	commits: {
+		title: "Commits & History",
+		subtitle: "Project commit history",
+		recentCommits: "Recent commits",
+		loadMore: "Load more",
+		empty: "No commits available",
+		author: "Author",
+	},
+};

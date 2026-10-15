@@ -65,8 +65,9 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 				</button>
 			</div>
 
-			{/* Navigation Links */}
+			{/* Navigation Links — mirrors candy.ai menu structure */}
 			<div className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto">
+				<CandyNavItem to="/" icon="🏠" label="Home" shortLabel="Home" collapsed={collapsed} />
 				<CandyNavItem
 					to="/"
 					icon="🔥"
@@ -75,19 +76,34 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 					collapsed={collapsed}
 					badge="Hot"
 				/>
+				<CandyNavItem to="/collection" icon="⚡" label="Shorts" shortLabel="Shorts" collapsed={collapsed} />
 				<CandyNavItem to="/chat" icon="💬" label="Chat" shortLabel="Chat" collapsed={collapsed} />
 				<CandyNavItem
 					to="/collection"
 					icon="📸"
-					label="Gallery & Memories"
-					shortLabel="Gallery"
+					label="Collection"
+					shortLabel="Collection"
 					collapsed={collapsed}
 				/>
 				<CandyNavItem
 					to="/library"
-					icon="🗂️"
-					label="Character Library"
-					shortLabel="Cards"
+					icon="🤖"
+					label="My AI"
+					shortLabel="My AI"
+					collapsed={collapsed}
+				/>
+				<CandyNavItem
+					to="/studio"
+					icon="✨"
+					label="Create Character"
+					shortLabel="Create"
+					collapsed={collapsed}
+				/>
+				<CandyNavItem
+					to="/hub"
+					icon="🔒"
+					label="Private Content"
+					shortLabel="Private"
 					collapsed={collapsed}
 				/>
 
@@ -188,15 +204,13 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 					label="Impact"
 					shortLabel="Impact"
 					collapsed={collapsed}
-<CandyNavItem
-		to="/commits"
-		icon="📜"
-		label="Commits"
-		shortLabel="History"
-		collapsed={collapsed}
-	/>
-	<a
-		href="https://browserytools.com"
+				/>
+				<CandyNavItem
+					to="/commits"
+					icon="📜"
+					label="Commits"
+					shortLabel="History"
+					collapsed={collapsed}
 				/>
 				<a
 					href="https://browserytools.com"
@@ -213,9 +227,10 @@ export function CandySidebar({ onOpenCreateModal, peerCount = 0, user, onLogout 
 				<CandyNavItem
 					to="/pricing"
 					icon="💎"
-					label="Pricing"
-					shortLabel="Pricing"
+					label="Premium"
+					shortLabel="Premium"
 					collapsed={collapsed}
+					badge="-70%"
 				/>
 
 				<CandyNavItem

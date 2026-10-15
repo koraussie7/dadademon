@@ -66,6 +66,15 @@ const ImageEditPage = lazy(() =>
 const APIKeysPage = lazy(() =>
 	import("@/pages/APIKeysPage").then((m) => ({ default: m.APIKeysPage })),
 );
+const CommitsPage = lazy(() =>
+	import("@/pages/CommitsPage").then((m) => ({ default: m.CommitsPage })),
+);
+const MessageCenterPage = lazy(() =>
+	import("@/pages/MessageCenterPage").then((m) => ({ default: m.MessageCenterPage })),
+);
+const TemplateStudioPage = lazy(() =>
+	import("@/pages/TemplateStudioPage").then((m) => ({ default: m.TemplateStudioPage })),
+);
 
 /** Shown while a lazily-loaded route chunk is in flight. */
 function RouteFallback() {
@@ -82,6 +91,17 @@ function RouteFallback() {
 const STORAGE_CUSTOM = "privseai_candy-custom_companions";
 
 export function App() {
+	// The Router must wrap the component that calls useLocation(): hooks run
+	// during render, before JSX children mount, so AppInner lives inside the
+	// Router context rather than next to it.
+	return (
+		<Router>
+			<AppInner />
+		</Router>
+	);
+}
+
+function AppInner() {
 	const { t } = useI18n();
 	const [companions, setCompanions] = useState<CandyCompanion[]>(() => {
 		const saved = localStorage.getItem(STORAGE_CUSTOM);
@@ -202,8 +222,7 @@ export function App() {
 	};
 
 	return (
-		<Router>
-			<IntegrationProvider autoInitLocal={false}>
+		<IntegrationProvider autoInitLocal={false}>
 				<div className="flex h-screen w-screen overflow-hidden bg-[#090a0f] text-gray-100 font-sans selection:bg-pink-500 selection:text-white">
 					{/* Candy Styled Desktop Sidebar */}
 					<CandySidebar
@@ -247,37 +266,60 @@ export function App() {
 							</div>
 						</header>
 
-						{/* Mobile Drawer Menu */}
-						{mobileNavOpen && (
-							<div className="md:hidden bg-[#0e0f17] border-b border-white/10 p-4 space-y-2 z-30 shrink-0">
-								<NavLink
-									to="/"
-									onClick={() => setMobileNavOpen(false)}
-									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
-								>
-									🔥 Discover
-								</NavLink>
-								<NavLink
-									to="/chat"
-									onClick={() => setMobileNavOpen(false)}
-									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
-								>
-									💬 Chat
-								</NavLink>
-								<NavLink
-									to="/collection"
-									onClick={() => setMobileNavOpen(false)}
-									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
-								>
-									📸 Gallery & Memories
-								</NavLink>
-								<NavLink
-									to="/library"
-									onClick={() => setMobileNavOpen(false)}
-									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
-								>
-									🗂️ Character Library
-								</NavLink>
+							{/* Mobile Drawer Menu */}
+							{/* Mirrors candy.ai / desktop sidebar structure */}
+							{mobileNavOpen && (
+								<div className="md:hidden bg-[#0e0f17] border-b border-white/10 p-4 space-y-2 z-30 shrink-0">
+									<NavLink
+										to="/"
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										🏠 Home
+									</NavLink>
+									<NavLink
+										to="/"
+										end
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										🔥 Discover
+									</NavLink>
+									<NavLink
+										to="/collection"
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										⚡ Shorts
+									</NavLink>
+									<NavLink
+										to="/chat"
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										💬 Chat
+									</NavLink>
+									<NavLink
+										to="/collection"
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										📸 Collection
+									</NavLink>
+									<NavLink
+										to="/library"
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										🤖 My AI
+									</NavLink>
+									<NavLink
+										to="/studio"
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										✨ Create Character
+									</NavLink>
 								<NavLink
 									to="/hub"
 									onClick={() => setMobileNavOpen(false)}
@@ -285,6 +327,20 @@ export function App() {
 								>
 									🧠 AI Hub
 								</NavLink>
+								<NavLink
+									to="/image-edit"
+									onClick={() => setMobileNavOpen(false)}
+									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+								>
+									🎨 Qwen NSFW Editor
+								</NavLink>
+									<NavLink
+										to="/pricing"
+										onClick={() => setMobileNavOpen(false)}
+										className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+									>
+										💎 Premium
+									</NavLink>
 								<NavLink
 									to="/image-edit"
 									onClick={() => setMobileNavOpen(false)}
@@ -347,6 +403,13 @@ export function App() {
 									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
 								>
 									💥 Impact
+								</NavLink>
+								<NavLink
+									to="/commits"
+									onClick={() => setMobileNavOpen(false)}
+									className="block px-3 py-2 rounded-xl text-sm font-semibold hover:bg-white/5"
+								>
+									📜 Commits
 								</NavLink>
 								<NavLink
 									to="/settings"
@@ -499,15 +562,17 @@ export function App() {
 											</AuthGate>
 										}
 									/>
-<Route
-		path="/commits"
-		element={
-			<CommitsPage />
-		}
-	/>
+									<Route
+										path="/commits"
+										element={
+											<AuthGate>
+												<CommitsPage />
+											</AuthGate>
+										}
+									/>
 									{/* Single entry point + tab bar for the four ledgers above.
-						    /events, /evidence, /forecasts and /impact were routable
-						    but unlinked, so this is the only discoverable way in. */}
+									    /events, /evidence, /forecasts and /impact were routable
+									    but unlinked, so this is the only discoverable way in. */}
 									<Route
 										path="/studio"
 										element={
@@ -557,13 +622,30 @@ export function App() {
 											</AuthGate>
 										}
 									/>
+									<Route
+										path="/messages"
+										element={
+											<AuthGate>
+												<MessageCenterPage />
+											</AuthGate>
+										}
+									/>
+									<Route
+										path="/templates"
+										element={
+											<AuthGate>
+												<TemplateStudioPage />
+											</AuthGate>
+										}
+									/>
 									<Route path="*" element={<Navigate to="/collection" replace />} />
 								</Routes>
 							</Suspense>
 						</main>
+
 					</div>
 
-					{/* Create / Edit Character Modal */}
+				{/* Create / Edit Character Modal */}
 					<CreateCompanionModal
 						isOpen={isCreateModalOpen || editingCompanion !== null}
 						editingCompanion={editingCompanion}
@@ -575,7 +657,6 @@ export function App() {
 						onUpdate={handleUpdateCompanion}
 					/>
 				</div>
-			</IntegrationProvider>
-		</Router>
+		</IntegrationProvider>
 	);
 }
