@@ -7,6 +7,7 @@
  */
 
 import type { CompanionProfile } from "@/components/CompanionChat";
+import type { CompanionScenario } from "@/data/candyPresets";
 import type { CharacterStage, EmotionState } from "@/types/character";
 import { STAGE_NAMES } from "@/types/character";
 
@@ -47,6 +48,7 @@ export class PersonalityEngine {
 		companion: CompanionProfile,
 		emotion: EmotionState,
 		stage: CharacterStage,
+		activeScenario?: CompanionScenario | null,
 	): string {
 		const parts: string[] = [];
 
@@ -71,6 +73,26 @@ export class PersonalityEngine {
 
 		if (companion.hobbies?.length) {
 			parts.push(`\nYour hobbies include: ${companion.hobbies.join(", ")}.`);
+		}
+
+		// Story / roleplay continuity. Without this block the model treats the
+		// scenario opener as a one-off user line and drifts out of character
+		// within a couple of turns.
+		if (activeScenario) {
+			parts.push("\n\n--- Active Scenario ---");
+			parts.push(`Title: ${activeScenario.title}`);
+			if (activeScenario.description) {
+				parts.push(`Premise: ${activeScenario.description}`);
+			}
+			if (activeScenario.starter) {
+				parts.push(`Opening beat: ${activeScenario.starter}`);
+			}
+			parts.push(
+				"Stay inside this scene and keep the story moving forward from it. " +
+					"Advance the plot naturally through the conversation, react to what the user does, " +
+					"and never exit the scenario unless the user clearly asks to stop. " +
+					"Do not repeat the opening beat verbatim — it already happened.",
+			);
 		}
 
 		parts.push(

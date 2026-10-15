@@ -1,3 +1,21 @@
+/** A single roleplay scenario / story beat for a companion. */
+export interface CompanionScenario {
+	id: string;
+	title: string;
+	description: string;
+	starter: string;
+	badge?: string;
+}
+
+/** Fallback used when a companion has no authored scenarios of its own. */
+export const DEFAULT_SCENARIO: CompanionScenario = {
+	id: "first-meeting",
+	title: "첫 만남의 설렘",
+	description: "처음으로 인사를 나누며 서로의 취향을 알아가는 시간입니다.",
+	starter: "*상대가 당신을 바라보며 환하게 미소 짓습니다.* 만나서 정말 반가워요.",
+	badge: "Free",
+};
+
 export interface CandyCompanion {
 	id: string;
 	name: string;
@@ -28,13 +46,7 @@ export interface CandyCompanion {
 		requiredStage?: number;
 		isNSFW?: boolean;
 	}[];
-	scenarios: {
-		id: string;
-		title: string;
-		description: string;
-		starter: string;
-		badge?: string;
-	}[];
+	scenarios: CompanionScenario[];
 }
 
 /**

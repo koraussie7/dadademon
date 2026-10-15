@@ -2,7 +2,7 @@ import { ByokManager } from "@/components/ByokManager";
 import { NexusPairingModal } from "@/components/NexusPairingModal";
 import { ResetMemoryButton } from "@/components/ResetMemoryButton";
 import { TTSButton } from "@/components/TTSButton";
-import type { CandyCompanion } from "@/data/candyPresets";
+import type { CandyCompanion, CompanionScenario } from "@/data/candyPresets";
 import { type ByokProviderId, byokProvidersReady } from "@/lib/byok-store";
 import { NexusClient, type NexusConfig } from "@/lib/nexus-client";
 import { useEffect, useRef, useState } from "react";
@@ -25,6 +25,11 @@ interface Props {
 	onStageProgress?: (newStage: number) => void;
 	onResetMemory?: () => void;
 	lettaBaseUrl?: string;
+	/**
+	 * Notifies the parent which roleplay scenario is active so the system prompt
+	 * can carry it. Pass `null` when the scenario ends (switch or exit).
+	 */
+	onScenarioChange?: (scenario: CompanionScenario | null) => void;
 	webGpuEnabled?: boolean;
 	webGpuState?: {
 		status: "idle" | "loading" | "ready" | "error";
@@ -57,6 +62,7 @@ export function CandyChat({
 	onSelectCompanion,
 	onSendMessage,
 	onStageProgress,
+	onScenarioChange,
 	webGpuEnabled = false,
 	webGpuState = { status: "idle", progress: 0, message: "" },
 	onEnableWebGpu,
@@ -145,8 +151,19 @@ export function CandyChat({
 
 	const bottomRef = useRef<HTMLDivElement>(null);
 
+	// The companion id this thread was bootstrapped for. The greeting bootstrap
+	// below must only run when the visitor switches companion — NOT on every
+	// `companion` identity change. The parent rebuilds `companion` whenever the
+	// relationship stage advances (to unlock gallery photos), and re-running the
+	// bootstrap there called setMessages([greeting]) mid-conversation, wiping
+	// the whole thread right after the stage-up message.
+	const bootstrappedCompanionIdRef = useRef<string | null>(null);
+
 	// Initialize messages with companion greeting and voice note
 	useEffect(() => {
+		if (bootstrappedCompanionIdRef.current === companion.id) return;
+		bootstrappedCompanionIdRef.current = companion.id;
+
 		const initial: CandyMessage[] = [
 			{
 				id: `greet-${companion.id}`,
@@ -179,11 +196,19 @@ export function CandyChat({
 		} catch {
 			setAffinity(companion.stage * 100 + 40);
 		}
-	}, [companion]);
+	}, [companion.id]);
 
 	useEffect(() => {
 		bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages, isTyping]);
+
+	// Scenario state is per-companion. Drop it on switch so companion A's story
+	// never leaks into companion B's prompt.
+	useEffect(() => {
+		setActiveScenario(null);
+		onScenarioChange?.(null);
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- only on companion switch
+	}, [companion.id]);
 
 	const handleSend = async (overrideText?: string) => {
 		const text = (overrideText || input).trim();
