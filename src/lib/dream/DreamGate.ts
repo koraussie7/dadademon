@@ -1,12 +1,11 @@
 /**
- * DreamGate — Strict opt-in gate for the dream engine.
+ * DreamGate — Gate for the dream engine.
  *
- * Per GENOME.md invariants: Dream Engine must be OFF by default.
- * Users must explicitly opt-in with approval + audit log entry.
- *
- * Dreams are offline reflection sessions that synthesize memory into
- * new insights via the LLM. They never trigger auto-updates or
- * external network calls without explicit user consent.
+ * Dream Engine is ON by default (operator-approved). Dreams are offline
+ * reflection sessions that synthesize memory into new insights via the LLM.
+ * They run locally and never make external network calls without explicit
+ * user consent. The operator can disable the engine at any time; every
+ * enable/disable/dream action is recorded in an audit trail.
  */
 
 export interface DreamConfig {
@@ -18,7 +17,7 @@ export interface DreamConfig {
 }
 
 const DEFAULT_CONFIG: DreamConfig = {
-	enabled: false,
+	enabled: true,
 	model: "gpt-4o-mini",
 	maxTokens: 512,
 	temperature: 0.7,
@@ -148,7 +147,9 @@ export class DreamGate {
 	}
 
 	clear(): void {
-		this.enabled = false;
+		// Restore to the factory default (currently enabled). This wipes any
+		// saved config, sessions, and audit trail.
+		this.enabled = DEFAULT_CONFIG.enabled;
 		try {
 			const ls = typeof localStorage !== "undefined" ? localStorage : null;
 			if (!ls) return;

@@ -1,5 +1,5 @@
 /**
- * Tests for DreamGate — strict opt-in gate for dream engine.
+ * Tests for DreamGate — gate for the dream engine (ON by default).
  */
 
 import { DreamGate, getDreamGate, resetDreamGate, isDreamEngineEnabled, DEFAULT_CONFIG } from "@/lib/dream/DreamGate";
@@ -34,13 +34,13 @@ describe("DreamGate", () => {
 	});
 
 	describe("default state", () => {
-		it("is disabled by default", () => {
-			expect(gate.isEnabled()).toBe(false);
+		it("is enabled by default", () => {
+			expect(gate.isEnabled()).toBe(true);
 		});
 
 		it("returns default config when none saved", () => {
 			const config = gate.getConfig();
-			expect(config.enabled).toBe(false);
+			expect(config.enabled).toBe(true);
 			expect(config.model).toBe(DEFAULT_CONFIG.model);
 			expect(config.maxTokens).toBe(512);
 			expect(config.temperature).toBe(0.7);
@@ -135,11 +135,11 @@ describe("DreamGate", () => {
 	});
 
 	describe("clear", () => {
-		it("clears enabled state, sessions, and audit log", async () => {
+		it("restores default (enabled) state and clears sessions + audit log", async () => {
 			await gate.requestEnable();
 			gate.addSession({ id: "d1", prompt: "p", result: "r", createdAt: Date.now() });
 			gate.clear();
-			expect(gate.isEnabled()).toBe(false);
+			expect(gate.isEnabled()).toBe(true);
 			expect(gate.getSessions().length).toBe(0);
 			expect(gate.getAuditLog().length).toBe(0);
 		});
@@ -160,9 +160,9 @@ describe("DreamGate", () => {
 			resetDreamGate();
 		});
 
-		it("isDreamEngineEnabled returns false by default", () => {
+		it("isDreamEngineEnabled returns true by default", () => {
 			resetDreamGate();
-			expect(isDreamEngineEnabled()).toBe(false);
+			expect(isDreamEngineEnabled()).toBe(true);
 		});
 	});
 });

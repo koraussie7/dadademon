@@ -1,10 +1,10 @@
 /**
- * Local-first enforcement tests — verify P2P OFF, Auto-update OFF, Dream OFF.
+ * Local-first enforcement tests — verify no silent network egress.
  *
- * These tests enforce the GENOME.md invariants:
- * - No outbound network calls without explicit opt-in
- * - No automatic updates
- * - Dream engine defaults to OFF
+ * Dream engine and auto-update are ON by default, but both remain local-first:
+ * - No outbound network calls without an explicitly-supplied resolver/URL
+ * - Auto-update never opens a connection on its own
+ * - P2P mesh starts empty until an identity/circle is set
  */
 
 import { syncMemoryIntoLetta } from "@/lib/letta-bridge";
@@ -13,6 +13,7 @@ import { getCanonicalLedger, resetCanonicalLedger } from "@/lib/memory/Canonical
 import { resetMemFS } from "@/lib/memfs/MemFS";
 import { getInstalledSkills } from "@/lib/skills/SkillLoader";
 import { getP2PMesh, resetP2PMesh } from "@/lib/mesh/P2PMesh";
+import { AutoUpdate, getAutoUpdate, resetAutoUpdate } from "@/lib/auto-update/AutoUpdate";
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 
 const testStore = new Map<string, string>();
@@ -42,6 +43,7 @@ describe("Local-first enforcement", () => {
 		resetCanonicalLedger();
 		resetMemFS();
 		resetP2PMesh();
+		resetAutoUpdate();
 		globalThis.fetch = originalFetch;
 		testStore.clear();
 	});
@@ -66,7 +68,20 @@ describe("Local-first enforcement", () => {
 		});
 	});
 
-	describe("no auto-update", () => {
+	describe("auto-update is ON by default but local-first", () => {
+		it("auto-update is enabled by default", () => {
+			resetAutoUpdate();
+			expect(getAutoUpdate().isEnabled()).toBe(true);
+		});
+
+		it("checkForUpdate makes no network call without a resolver", async () => {
+			globalThis.fetch = vi.fn();
+			const au = new AutoUpdate();
+			const result = await au.checkForUpdate();
+			expect(result).toBeNull();
+			expect(globalThis.fetch).not.toHaveBeenCalled();
+		});
+
 		it("MemFS sync returns false without remote URL", async () => {
 			const { getMemFS } = await import("@/lib/memfs/MemFS");
 			const memfs = getMemFS();
@@ -75,28 +90,23 @@ describe("Local-first enforcement", () => {
 		});
 	});
 
-	describe("dream engine OFF by default", () => {
-		it("dream engine is disabled by default", () => {
+	describe("dream engine ON by default", () => {
+		it("dream engine is enabled by default", () => {
 			resetDreamGate();
 			const gate = getDreamGate();
-			expect(gate.isEnabled()).toBe(false);
+			expect(gate.isEnabled()).toBe(true);
 		});
 
-		it("has empty audit log before explicit enable", () => {
+		it("has empty audit log before any action", () => {
 			resetDreamGate();
 			const gate = getDreamGate();
 			expect(gate.getAuditLog().length).toBe(0);
 		});
 
-		it("persisting config does not enable dream", () => {
+		it("operator can still disable the dream engine", () => {
 			resetDreamGate();
 			const gate = getDreamGate();
-			gate.addSession({
-				id: "pre-enable",
-				prompt: "test",
-				result: "blocked",
-				createdAt: Date.now(),
-			});
+			gate.disable();
 			expect(gate.isEnabled()).toBe(false);
 		});
 	});
