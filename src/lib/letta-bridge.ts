@@ -11,6 +11,8 @@
  */
 
 import { type MemoryFact, getAllFacts } from "@/lib/companion-memory";
+import { getCanonicalLedger } from "@/lib/memory/CanonicalLedger";
+import { type LedgerEntryInput } from "@/lib/memory/CanonicalLedger";
 import type { LettaAgentState, LettaMemoryBlock } from "@/types/letta";
 import type { MemoryEntry } from "@/types/unified";
 
@@ -28,8 +30,26 @@ export function factsToLettaBlocks(
 	facts: MemoryFact[],
 	summary: string,
 ): LettaMemoryBlock[] {
-	const humanFacts = facts.filter((f) => f.scope === "global" || f.companionId === companionId);
-	const companionFacts = facts.filter((f) => f.scope === "companion");
+	const ledger = getCanonicalLedger();
+
+	for (const fact of facts) {
+		const input: LedgerEntryInput = {
+			id: `${companionId}-${fact.id}`,
+			text: fact.text,
+			scope: fact.scope,
+			source: "user",
+		};
+		ledger.add(input);
+		for (let i = 0; i < fact.hits; i++) {
+			ledger.corroborate(input.id);
+		}
+	}
+
+	const highConfidence = ledger.promote(companionId);
+	const humanFacts = highConfidence.filter((e) => e.scope === "global");
+		const companionFacts = highConfidence.filter(
+		(e) => e.scope === "companion" && e.id.startsWith(`${companionId}-`),
+	);
 
 	const blocks: LettaMemoryBlock[] = [];
 
@@ -113,11 +133,14 @@ export async function syncMemoryIntoLetta(
 	companionId: string,
 ): Promise<boolean> {
 	try {
+		const safeLocalStorage = typeof localStorage !== "undefined" ? localStorage : null;
 		const facts = getAllFacts(companionId);
-		const store = JSON.parse(localStorage.getItem("privsei.memory.v1") ?? "{}") as Record<
-			string,
-			{ summary: string }
-		>;
+		const store = safeLocalStorage
+			? JSON.parse(safeLocalStorage.getItem("privsei.memory.v1") ?? "{}") as Record<
+					string,
+					{ summary: string }
+				>
+			: {};
 		const summary = store[companionId]?.summary ?? "";
 
 		const blocks = factsToLettaBlocks(companionId, facts, summary);
